@@ -1,20 +1,29 @@
-from flask import Flask, request, jsonify
+import os
+from flask import Flask, request, jsonify, Response, send_from_directory
 from flask_cors import CORS
 import pandas as pd
 import numpy as np
 import random
 import threading
 import time
+import json
 from datetime import datetime
 import warnings
 warnings.filterwarnings('ignore')
 
 # Import from models folder
-from models import ClassifierModel, AutoencoderModel, SHAPExplainer, DigitalTwin
+from models.classifier import ThreatClassifier as ClassifierModel
+from models.autoencoder import AutoencoderDetector as AutoencoderModel
+from models.shap_explain import SHAPExplainer
+from models.twin import DigitalTwin
 
-app = Flask(__name__)
-CORS(app, origins=["http://127.0.0.1:5500", "http://localhost:5500"], 
-     supports_credentials=True, methods=["GET", "POST", "OPTIONS"])
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+app = Flask(__name__, static_folder=parent_dir, static_url_path='')
+CORS(app, supports_credentials=True)
+
+@app.route('/')
+def serve_index():
+    return send_from_directory(parent_dir, 'index.html')
 
 # ---------- GLOBAL STATE ----------
 threat_history = []
@@ -116,8 +125,8 @@ def init_models():
     
     # 3. SHAP Explainer
     print("  - Initializing SHAP Explainer...")
-    shap_explainer = SHAPExplainer(classifier.model)
-    shap_explainer.fit(X_train)
+    shap_explainer = SHAPExplainer()
+    shap_explainer.fit(classifier.model, X_train.iloc[:200] if hasattr(X_train, 'iloc') else X_train[:200], feature_names)
     
     # 4. Digital Twin
     print("  - Initializing Digital Twin...")
@@ -136,8 +145,15 @@ def analyze_threat(features, mode='normal'):
         if features_array.shape[1] != len(feature_names):
             features_array = np.random.randn(1, len(feature_names))
         
-        pred = classifier.predict(features_array)[0]
-        prob = classifier.predict_proba(features_array)[0]
+        res = classifier.predict(features_array)
+        if isinstance(res, tuple):
+            preds, proba = res
+            pred = preds[0]
+            prob = proba[0]
+        else:
+            pred = res[0]
+            prob = classifier.predict_proba(features_array)[0]
+
         confidence = float(max(prob))
         attack_prob = float(prob[1]) if len(prob) > 1 else 0.0
         
@@ -206,6 +222,8 @@ def process_threat(threat_data):
         'source': threat_data.get('source', 'unknown'),
         'details': threat_data.get('details', {})
     }
+    if digital_twin:
+        digital_twin.observe_threat({'severity': severity, 'attack_probability': threat_data.get('details', {}).get('confidence', 0.5)})
     return {"threat_id": threat_id, "severity": severity, "status": status, "action_taken": action_taken, "requires_human": requires_human}
 
 # ---------- MONITORING LOOP ----------
@@ -218,13 +236,17 @@ def monitor_loop():
             scan_count += 1
             random_features = np.random.randn(len(feature_names))
             threat = analyze_threat(random_features)
+            if 'error' in threat:
+                print(f"⚠️ Monitoring scan error: {threat['error']}")
+                time.sleep(5)
+                continue
             threat['features'] = random_features.tolist()
             threat['scan_number'] = scan_count
             threat['source'] = f"192.168.1.{random.randint(1, 255)}"
             processed = process_threat({
                 'severity': threat['severity'],
                 'source': threat['source'],
-                'details': {'confidence': threat['confidence'], 'prediction': threat['prediction']}
+                'details': {'confidence': threat.get('confidence', 0.5), 'prediction': threat.get('prediction', 0)}
             })
             threat['processed'] = processed
             threat_history.append(threat)
@@ -272,7 +294,7 @@ def get_metrics():
         return '', 200
     from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
     X_scaled = scaler.transform(X_train)
-    y_pred = classifier.predict(X_train)
+    y_pred, _ = classifier.predict(X_train)
     return jsonify({
         'success': True,
         'metrics': {
@@ -339,6 +361,8 @@ def remediate_threat():
             'timestamp': datetime.now().isoformat(),
             'admin': 'admin@cyberimmune.ai'
         })
+        if digital_twin:
+            digital_twin.observe_remediation({'threat_id': threat_id, 'action': action, 'status': status})
         return jsonify({'success': True, 'threat_id': threat_id, 'status': status, 'action_taken': action_taken, 'message': f'Threat {threat_id} {status}'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -414,6 +438,8 @@ def threat_detection():
             features = np.random.randn(len(feature_names)).tolist()
         mode = data.get('mode', 'normal')
         result = analyze_threat(features, mode)
+        if 'error' in result:
+            return jsonify({'success': False, 'error': result['error']}), 500
         tn = random.randint(400, 500)
         fp = random.randint(5, 30)
         fn = random.randint(3, 20)
@@ -485,6 +511,53 @@ def digital_twin_endpoint():
         return jsonify({'success': True, 'twin_state': state, 'scenario': scenario})
     else:
         return jsonify({'success': False, 'error': 'Digital Twin not initialized'}), 503
+
+@app.route('/api/twin/state', methods=['GET', 'OPTIONS'])
+def get_digital_twin_state():
+    if request.method == 'OPTIONS':
+        return '', 200
+    if digital_twin:
+        return jsonify({'success': True, 'twin_state': digital_twin.get_state()})
+    return jsonify({'success': False, 'error': 'Digital twin model not initialized'}), 503
+
+@app.route('/api/twin/history', methods=['GET', 'OPTIONS'])
+def get_digital_twin_history():
+    if request.method == 'OPTIONS':
+        return '', 200
+    limit = request.args.get('limit', 50, type=int)
+    if digital_twin:
+        return jsonify({'success': True, 'history': digital_twin.get_history(limit)})
+    return jsonify({'success': False, 'error': 'Digital twin model not initialized'}), 503
+
+@app.route('/api/twin/stream', methods=['GET'])
+def stream_digital_twin_state():
+    def generate():
+        while True:
+            try:
+                if digital_twin:
+                    payload = digital_twin.get_state()
+                    yield f"data: {json.dumps(payload)}\n\n"
+                time.sleep(1.5)
+            except GeneratorExit:
+                break
+            except Exception:
+                time.sleep(2)
+    return Response(generate(), mimetype='text/event-stream')
+
+@app.route('/api/twin/simulate-what-if', methods=['POST', 'OPTIONS'])
+def simulate_digital_twin_what_if():
+    if request.method == 'OPTIONS':
+        return '', 200
+    try:
+        data = request.json or {}
+        scenario = data.get('scenario', 'ddos_attack')
+        params = data.get('params', {})
+        if digital_twin:
+            sim_result = digital_twin.run_sandbox_simulation(scenario, params, classifier, autoencoder)
+            return jsonify({'success': True, 'simulation': sim_result})
+        return jsonify({'success': False, 'error': 'Digital Twin engine offline'}), 503
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/response', methods=['POST', 'OPTIONS'])
 def response_agent():

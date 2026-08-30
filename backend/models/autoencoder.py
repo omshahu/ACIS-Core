@@ -1,59 +1,36 @@
-import numpy as np
+"""
+ACIS-Core — Autoencoder Anomaly Detector (PCA-based)
+"""
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-import pickle
+import numpy as np
 
-class AutoencoderModel:
-    def __init__(self, n_components=4):
-        self.n_components = n_components
-        self.pca = PCA(n_components=n_components)
+
+class AutoencoderDetector:
+    def __init__(self, n_components: int = 8, threshold_percentile: int = 95):
         self.scaler = StandardScaler()
+        self.pca = PCA(n_components=n_components)
+        self.threshold = None
         self.is_trained = False
-        self.input_dim = None
-    
-    def train(self, X, epochs=30, batch_size=32):
-        if hasattr(X, 'values'):
-            X = X.values
-        self.input_dim = X.shape[1]
+        self.threshold_percentile = threshold_percentile
+
+    def train(self, X):
         X_scaled = self.scaler.fit_transform(X)
-        self.pca.fit(X_scaled)
+        encoded = self.pca.fit_transform(X_scaled)
+        decoded = self.pca.inverse_transform(encoded)
+        errors = np.mean((X_scaled - decoded) ** 2, axis=1)
+        self.threshold = float(np.percentile(errors, self.threshold_percentile))
         self.is_trained = True
-        print(f"✅ Autoencoder trained with {self.n_components} dimensions")
-        return self
-    
-    def reconstruct(self, X):
-        if not self.is_trained:
-            raise ValueError("Model not trained yet")
-        if hasattr(X, 'values'):
-            X = X.values
+
+    def predict(self, X):
+        """Returns (is_anomaly array, reconstruction_error array)."""
         X_scaled = self.scaler.transform(X)
         encoded = self.pca.transform(X_scaled)
-        reconstructed = self.pca.inverse_transform(encoded)
-        return self.scaler.inverse_transform(reconstructed)
-    
-    def anomaly_score(self, X):
-        if not self.is_trained:
-            raise ValueError("Model not trained yet")
-        if hasattr(X, 'values'):
-            X = X.values
-        X_scaled = self.scaler.transform(X)
-        encoded = self.pca.transform(X_scaled)
-        reconstructed = self.pca.inverse_transform(encoded)
-        mse = np.mean((X_scaled - reconstructed) ** 2, axis=1)
-        return mse[0] if len(mse) == 1 else mse
-    
-    def save(self, path):
-        with open(path, 'wb') as f:
-            pickle.dump({
-                'pca': self.pca,
-                'scaler': self.scaler,
-                'n_components': self.n_components
-            }, f)
-    
-    def load(self, path):
-        with open(path, 'rb') as f:
-            data = pickle.load(f)
-        self.pca = data['pca']
-        self.scaler = data['scaler']
-        self.n_components = data['n_components']
-        self.is_trained = True
+        decoded = self.pca.inverse_transform(encoded)
+        errors = np.mean((X_scaled - decoded) ** 2, axis=1)
+        return errors > self.threshold, errors
+
+    def score_single(self, x_row):
+        """Score a single sample row (numpy array)."""
+        _, errors = self.predict(x_row.reshape(1, -1))
+        return float(errors[0])
