@@ -1,56 +1,52 @@
-import numpy as np
+"""
+ACIS-Core — Simple Threat Classifier (Random Forest)
+"""
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
-import pickle
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+import numpy as np
 
-class ClassifierModel:
+
+class ThreatClassifier:
     def __init__(self):
-        self.model = None
+        self.model = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
         self.scaler = StandardScaler()
         self.is_trained = False
         self.feature_names = []
-    
+
     def train(self, X, y):
-        if hasattr(X, 'values'):
-            X = X.values
-        if hasattr(y, 'values'):
-            y = y.values
-        self.feature_names = [f'feature_{i}' for i in range(X.shape[1])]
+        self.feature_names = list(X.columns) if hasattr(X, "columns") else [f"f{i}" for i in range(X.shape[1])]
         X_scaled = self.scaler.fit_transform(X)
-        self.model = RandomForestClassifier(n_estimators=100, random_state=42, max_depth=10)
         self.model.fit(X_scaled, y)
         self.is_trained = True
-        print(f"✅ Classifier trained on {len(X)} samples")
-        return self
-    
+
     def predict(self, X):
-        if not self.is_trained:
-            raise ValueError("Model not trained yet")
-        if hasattr(X, 'values'):
-            X = X.values
         X_scaled = self.scaler.transform(X)
-        return self.model.predict(X_scaled)
-    
+        preds = self.model.predict(X_scaled)
+        proba = self.model.predict_proba(X_scaled)
+        return preds, proba
+
     def predict_proba(self, X):
-        if not self.is_trained:
-            raise ValueError("Model not trained yet")
-        if hasattr(X, 'values'):
-            X = X.values
         X_scaled = self.scaler.transform(X)
         return self.model.predict_proba(X_scaled)
-    
-    def save(self, path):
-        with open(path, 'wb') as f:
-            pickle.dump({
-                'model': self.model,
-                'scaler': self.scaler,
-                'feature_names': self.feature_names
-            }, f)
-    
-    def load(self, path):
-        with open(path, 'rb') as f:
-            data = pickle.load(f)
-        self.model = data['model']
-        self.scaler = data['scaler']
-        self.feature_names = data.get('feature_names', [])
-        self.is_trained = True
+
+    def get_metrics(self, X, y):
+        if not self.is_trained:
+            return {}
+        X_scaled = self.scaler.transform(X)
+        y_pred = self.model.predict(X_scaled)
+        return {
+            "accuracy":  round(accuracy_score(y, y_pred) * 100, 2),
+            "precision": round(precision_score(y, y_pred, zero_division=0) * 100, 2),
+            "recall":    round(recall_score(y, y_pred, zero_division=0) * 100, 2),
+            "f1_score":  round(f1_score(y, y_pred, zero_division=0) * 100, 2),
+        }
+
+    def get_feature_importance(self):
+        if not self.is_trained:
+            return []
+        pairs = zip(self.feature_names, self.model.feature_importances_)
+        return [
+            {"feature": n, "importance": round(float(v), 4)}
+            for n, v in sorted(pairs, key=lambda x: -x[1])[:10]
+        ]

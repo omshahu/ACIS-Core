@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ACIS-Core | Autonomous Cyberimmune Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
     <style>
         /* ================================================================
            FINAL LIGHT GREY THEME – Single Column Threat Details
@@ -17,44 +20,44 @@
             --bg-card: #FFFFFF;
             --bg-input: #f1f5f9;
             --bg-hover: #e2e8f0;
-            --border-color: #e2e8f0;
+            --border-color: #cbd5e1;
             --border-light: #f1f5f9;
             --text-primary: #0F172A;
-            --text-secondary: #475569;
-            --text-muted: #94a3b8;
-            --text-body: #475569;
-            --accent: #64748b;
-            --accent-hover: #475569;
-            --accent-light: rgba(100, 116, 139, 0.08);
-            --success: #166534;
-            --success-bg: #dcfce7;
-            --warning: #854d0e;
-            --warning-bg: #fef9c3;
-            --danger: #dc2626;
-            --danger-bg: #fef2f2;
-            --card-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            --status-connected: #166534;
-            --status-disconnected: #dc2626;
+            --text-secondary: #1E293B;
+            --text-muted: #64748B;
+            --text-body: #334155;
+            --accent: #3B82F6;
+            --accent-hover: #2563EB;
+            --accent-light: rgba(59, 130, 246, 0.12);
+            --success: #10B981;
+            --success-bg: rgba(16, 185, 129, 0.12);
+            --warning: #F59E0B;
+            --warning-bg: rgba(245, 158, 11, 0.12);
+            --danger: #EF4444;
+            --danger-bg: rgba(239, 68, 68, 0.12);
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --status-connected: #10B981;
+            --status-disconnected: #EF4444;
             --scrollbar-track: #f1f5f9;
             --scrollbar-thumb: #cbd5e1;
-            --btn-primary: #64748b;
-            --btn-primary-hover: #475569;
+            --btn-primary: #3B82F6;
+            --btn-primary-hover: #2563EB;
             --sidebar-bg: #FFFFFF;
             --sidebar-border: #e2e8f0;
             --panel-bg: #FFFFFF;
             --panel-border: #e2e8f0;
-            --log-bg: #f1f5f9;
-            --log-border: #64748b;
-            --terminal-color: #475569;
-            --hash-color: #64748b;
-            --badge-verified-bg: #dcfce7;
-            --badge-verified-color: #166534;
-            --badge-pending-bg: #fef9c3;
-            --badge-pending-color: #854d0e;
-            --chart-grid: rgba(0,0,0,0.04);
+            --log-bg: #f8fafc;
+            --log-border: #3B82F6;
+            --terminal-color: #1E293B;
+            --hash-color: #3B82F6;
+            --badge-verified-bg: rgba(16, 185, 129, 0.12);
+            --badge-verified-color: #10B981;
+            --badge-pending-bg: rgba(245, 158, 11, 0.12);
+            --badge-pending-color: #F59E0B;
+            --chart-grid: rgba(0, 0, 0, 0.06);
             --chart-ticks: #475569;
-            --shap-positive: #64748b;
-            --shap-negative: #94a3b8;
+            --shap-positive: #10B981;
+            --shap-negative: #EF4444;
             --shap-highlight: #64748b;
         }
 
@@ -98,14 +101,19 @@
             --badge-verified-color: #4ade80;
             --badge-pending-bg: rgba(251, 191, 36, 0.15);
             --badge-pending-color: #fbbf24;
-            --chart-grid: rgba(255,255,255,0.04);
+            --chart-grid: rgba(255, 255, 255, 0.04);
             --chart-ticks: #94a3b8;
             --shap-positive: #60A5FA;
             --shap-negative: #3d3d45;
             --shap-highlight: #60A5FA;
         }
 
-        * { margin:0; padding:0; box-sizing:border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             background: var(--bg-primary);
             color: var(--text-primary);
@@ -113,6 +121,7 @@
             height: 100vh;
             overflow: hidden;
         }
+
         .dashboard {
             display: flex;
             height: 100vh;
@@ -129,6 +138,7 @@
             border-right: 1px solid var(--sidebar-border);
             flex-shrink: 0;
         }
+
         .logo {
             display: flex;
             align-items: center;
@@ -138,9 +148,19 @@
             color: var(--text-primary);
             margin-bottom: 40px;
         }
-        .logo .shield-icon { color: var(--accent); }
-        .sidebar nav { flex:1; }
-        .sidebar nav ul { list-style:none; }
+
+        .logo .shield-icon {
+            color: var(--accent);
+        }
+
+        .sidebar nav {
+            flex: 1;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+        }
+
         .sidebar nav ul li {
             padding: 12px 16px;
             margin: 2px 0;
@@ -154,14 +174,24 @@
             font-weight: 500;
             font-size: 0.9rem;
         }
-        .sidebar nav ul li i { width:20px; text-align:center; color:var(--text-muted); }
+
+        .sidebar nav ul li i {
+            width: 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
         .sidebar nav ul li.active,
         .sidebar nav ul li:hover {
             background: var(--bg-hover);
             color: var(--text-primary);
         }
+
         .sidebar nav ul li.active i,
-        .sidebar nav ul li:hover i { color: var(--accent); }
+        .sidebar nav ul li:hover i {
+            color: var(--accent);
+        }
+
         .user-info {
             margin-top: 30px;
             padding-top: 18px;
@@ -172,17 +202,37 @@
             color: var(--text-secondary);
             font-size: 0.85rem;
         }
-        .user-info i { font-size:1.2rem; color:var(--accent); }
-        .user-info span { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .logout-btn {
-            background:none; border:none; color:var(--danger); cursor:pointer; font-size:1rem;
-            padding:5px 8px; border-radius:6px; transition:0.15s;
+
+        .user-info i {
+            font-size: 1.2rem;
+            color: var(--accent);
         }
-        .logout-btn:hover { background:var(--danger-bg); }
+
+        .user-info span {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 5px 8px;
+            border-radius: 6px;
+            transition: 0.15s;
+        }
+
+        .logout-btn:hover {
+            background: var(--danger-bg);
+        }
 
         /* Main content */
         .main-content {
-            flex:1;
+            flex: 1;
             padding: 24px 32px;
             overflow-y: auto;
             background: var(--bg-primary);
@@ -197,6 +247,7 @@
             flex-wrap: wrap;
             gap: 12px;
         }
+
         header h1 {
             font-size: 1.4rem;
             font-weight: 600;
@@ -205,13 +256,18 @@
             align-items: center;
             gap: 10px;
         }
-        header h1 .shield-icon { color: var(--accent); }
+
+        header h1 .shield-icon {
+            color: var(--accent);
+        }
+
         .header-right {
             display: flex;
             align-items: center;
             gap: 12px;
             flex-wrap: wrap;
         }
+
         .theme-selector-wrap {
             display: flex;
             align-items: center;
@@ -221,12 +277,14 @@
             border-radius: 20px;
             border: 1px solid var(--border-color);
         }
+
         .theme-selector-wrap .label {
             font-size: 0.6rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
         .theme-btn {
             padding: 3px 12px;
             border-radius: 12px;
@@ -238,15 +296,18 @@
             cursor: pointer;
             transition: 0.15s;
         }
+
         .theme-btn:hover {
             border-color: var(--accent);
             color: var(--text-primary);
         }
+
         .theme-btn.active {
             border-color: var(--accent);
             background: var(--accent);
             color: #fff;
         }
+
         .status-badge {
             background: var(--panel-bg);
             padding: 5px 14px;
@@ -258,8 +319,11 @@
             color: var(--text-secondary);
             border: 1px solid var(--border-color);
         }
+
         .status-badge .dot {
-            width: 7px; height: 7px; border-radius: 50%;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
             background: var(--status-connected);
             display: inline-block;
         }
@@ -271,6 +335,7 @@
             gap: 16px;
             margin-bottom: 20px;
         }
+
         .card {
             background: var(--bg-card);
             padding: 18px 20px;
@@ -278,9 +343,27 @@
             border: 1px solid var(--border-color);
             box-shadow: var(--card-shadow);
         }
-        .card .card-icon { color: var(--accent); font-size: 1.1rem; margin-bottom: 4px; }
-        .card h3 { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; font-weight: 500; }
-        .card p { font-size: 1.5rem; font-weight: 700; color: var(--text-secondary); margin-top: 2px; }
+
+        .card .card-icon {
+            color: var(--accent);
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .card h3 {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            font-weight: 500;
+        }
+
+        .card p {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
 
         /* DETAIL PANEL – Single Column (removed right side) */
         .detail-panel {
@@ -289,6 +372,7 @@
             gap: 0;
             margin-bottom: 20px;
         }
+
         .detail-left {
             background: var(--panel-bg);
             padding: 16px 20px;
@@ -296,6 +380,7 @@
             border: 1px solid var(--panel-border);
             box-shadow: var(--card-shadow);
         }
+
         .detail-left h4 {
             font-size: 0.7rem;
             color: var(--text-muted);
@@ -303,34 +388,91 @@
             letter-spacing: 0.3px;
             margin-bottom: 6px;
         }
-        .detail-left .severity .label { color: var(--text-muted); font-size: 0.85rem; }
-        .detail-left .severity .value { color: var(--text-secondary); font-weight: 700; font-size: 0.95rem; }
-        .detail-left .ai-action { color: var(--text-secondary); font-size: 0.9rem; }
-        .detail-left .ai-action span { color: var(--text-muted); }
+
+        .detail-left .severity .label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .detail-left .severity .value {
+            color: var(--text-secondary);
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .detail-left .ai-action {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .detail-left .ai-action span {
+            color: var(--text-muted);
+        }
 
         /* Metrics Grid */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 14px;
+            gap: 16px;
             margin-bottom: 20px;
+        }
+
+        .metric-item {
             background: var(--panel-bg);
             padding: 16px 20px;
             border-radius: 12px;
             border: 1px solid var(--panel-border);
             box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s;
         }
-        .metric-item { display: flex; flex-direction: column; align-items: center; }
-        .metric-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; }
-        .metric-value { font-size: 1.4rem; font-weight: 700; color: var(--text-secondary); margin-top: 1px; }
+
+        .metric-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .metric-item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent);
+        }
+
+        .metric-item:nth-child(1)::after { background: #10B981; }
+        .metric-item:nth-child(2)::after { background: #3B82F6; }
+        .metric-item:nth-child(3)::after { background: #8B5CF6; }
+        .metric-item:nth-child(4)::after { background: #F59E0B; }
+
+        .metric-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-top: 4px;
+        }
 
         /* Viz cards */
         .viz-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            grid-template-columns: 1fr;
+            gap: 20px;
             margin-top: 16px;
         }
+
         .viz-card {
             background: var(--panel-bg);
             padding: 16px 20px;
@@ -338,39 +480,119 @@
             border: 1px solid var(--panel-border);
             box-shadow: var(--card-shadow);
         }
-        .viz-card h4 { font-size: 0.85rem; color: var(--text-primary); font-weight: 500; margin-bottom: 8px; }
+
+        .viz-card h4 {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
         .confusion-matrix {
             display: grid;
             grid-template-columns: auto 1fr 1fr;
             gap: 2px;
             font-size: 0.75rem;
         }
-        .confusion-matrix .header { color: var(--text-muted); padding: 4px 8px; text-align: center; }
-        .confusion-matrix .cell { padding: 8px 12px; text-align: center; border-radius: 4px; }
-        .confusion-matrix .cell-tn { background: var(--success-bg); color: var(--success); }
-        .confusion-matrix .cell-fp { background: var(--danger-bg); color: var(--danger); }
-        .confusion-matrix .cell-fn { background: var(--warning-bg); color: var(--warning); }
-        .confusion-matrix .cell-tp { background: var(--success-bg); color: var(--success); font-weight: 700; }
-        .confusion-matrix .row-label { color: var(--text-secondary); padding: 4px 8px 4px 0; text-align: right; }
+
+        .confusion-matrix .header {
+            color: var(--text-muted);
+            padding: 4px 8px;
+            text-align: center;
+        }
+
+        .confusion-matrix .cell {
+            padding: 8px 12px;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .confusion-matrix .cell-tn {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .confusion-matrix .cell-fp {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .confusion-matrix .cell-fn {
+            background: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .confusion-matrix .cell-tp {
+            background: var(--success-bg);
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .confusion-matrix .row-label {
+            color: var(--text-secondary);
+            padding: 4px 8px 4px 0;
+            text-align: right;
+        }
 
         /* SHAP Bars – with colors */
-        .feature-bar { display: flex; align-items: center; gap: 10px; margin: 3px 0; }
-        .feature-bar .name { width: 100px; font-size: 0.7rem; color: var(--text-secondary); text-align: right; }
-        .feature-bar .bar-track { flex: 1; height: 16px; background: var(--bg-input); border-radius: 8px; overflow: hidden; }
-        .feature-bar .bar-fill { height: 100%; border-radius: 8px; }
-        .feature-bar .bar-fill.positive { background: var(--shap-positive); }
-        .feature-bar .bar-fill.negative { background: var(--shap-negative); }
-        .feature-bar .bar-fill.highlight { background: var(--shap-highlight); }
-        .feature-bar .value-text { width: 50px; font-size: 0.7rem; color: var(--text-secondary); text-align: right; }
+        .feature-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 3px 0;
+        }
+
+        .feature-bar .name {
+            width: 100px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-align: right;
+        }
+
+        .feature-bar .bar-track {
+            flex: 1;
+            height: 16px;
+            background: var(--bg-input);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .feature-bar .bar-fill {
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        .feature-bar .bar-fill.positive {
+            background: var(--shap-positive);
+        }
+
+        .feature-bar .bar-fill.negative {
+            background: var(--shap-negative);
+        }
+
+        .feature-bar .bar-fill.highlight {
+            background: var(--shap-highlight);
+        }
+
+        .feature-bar .value-text {
+            width: 50px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-align: right;
+        }
 
         /* Controls */
-        .controls-section { margin-top: 20px; }
+        .controls-section {
+            margin-top: 20px;
+        }
+
         .controls-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
             margin-bottom: 16px;
         }
+
         .control-btn {
             padding: 10px 16px;
             background: var(--bg-input);
@@ -383,19 +605,23 @@
             font-weight: 500;
             transition: 0.15s;
         }
+
         .control-btn:hover {
             background: var(--bg-hover);
             border-color: var(--accent);
             color: var(--text-primary);
         }
+
         .run-all-btn {
             background: var(--btn-primary);
             border-color: var(--btn-primary);
             color: #fff;
         }
+
         .run-all-btn:hover {
             background: var(--btn-primary-hover);
         }
+
         .monitoring-box {
             background: var(--panel-bg);
             padding: 16px 20px;
@@ -403,9 +629,25 @@
             border: 1px solid var(--border-color);
             margin-bottom: 16px;
         }
-        .monitoring-box h3 { font-size: 0.9rem; color: var(--text-primary); margin-bottom: 4px; }
-        .monitoring-box p { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px; }
-        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .monitoring-box h3 {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .monitoring-box p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
         .btn-group button {
             padding: 6px 16px;
             border: none;
@@ -415,9 +657,19 @@
             cursor: pointer;
             color: #fff;
         }
-        .btn-start { background: var(--success); }
-        .btn-stop { background: var(--danger); }
-        .btn-refresh { background: var(--accent); }
+
+        .btn-start {
+            background: var(--success);
+        }
+
+        .btn-stop {
+            background: var(--danger);
+        }
+
+        .btn-refresh {
+            background: var(--accent);
+        }
+
         .sim-box {
             background: var(--panel-bg);
             padding: 12px 16px;
@@ -429,7 +681,12 @@
             gap: 12px;
             flex-wrap: wrap;
         }
-        .sim-box label { font-size: 0.8rem; color: var(--text-secondary); }
+
+        .sim-box label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
         .sim-box select {
             padding: 4px 12px;
             border-radius: 6px;
@@ -438,6 +695,7 @@
             font-size: 0.8rem;
             color: var(--text-primary);
         }
+
         .log-entry {
             background: var(--log-bg);
             padding: 6px 12px;
@@ -448,7 +706,11 @@
             color: var(--terminal-color);
             font-family: 'JetBrains Mono', monospace;
         }
-        .log-entry .time { color: var(--text-muted); }
+
+        .log-entry .time {
+            color: var(--text-muted);
+        }
+
         .result-container {
             background: var(--panel-bg);
             padding: 16px 20px;
@@ -458,6 +720,7 @@
             max-height: 500px;
             overflow-y: auto;
         }
+
         .result-card {
             background: var(--bg-input);
             padding: 14px 18px;
@@ -465,13 +728,41 @@
             margin-bottom: 10px;
             border-left: 3px solid var(--accent);
         }
-        .result-card h4 { color: var(--text-primary); font-size: 0.9rem; margin-bottom: 6px; }
-        .result-card .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.85rem; }
-        .result-card .full { grid-column: 1 / -1; }
-        .result-card .key { color: var(--text-muted); }
-        .result-card .value { color: var(--text-secondary); font-weight: 500; }
-        .result-card .sub-item { padding-left: 12px; color: var(--text-body); }
-        .result-card .sub-item .key { color: var(--text-muted); }
+
+        .result-card h4 {
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+        }
+
+        .result-card .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+
+        .result-card .full {
+            grid-column: 1 / -1;
+        }
+
+        .result-card .key {
+            color: var(--text-muted);
+        }
+
+        .result-card .value {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .result-card .sub-item {
+            padding-left: 12px;
+            color: var(--text-body);
+        }
+
+        .result-card .sub-item .key {
+            color: var(--text-muted);
+        }
 
         /* ====== VERTICAL OUTPUTS ====== */
         .model-results-grid {
@@ -480,6 +771,7 @@
             gap: 12px;
             margin-top: 10px;
         }
+
         .model-result-card {
             background: var(--bg-input);
             padding: 14px 18px;
@@ -487,11 +779,13 @@
             border: 1px solid var(--border-color);
             width: 100%;
         }
+
         .model-result-card h4 {
             color: var(--text-primary);
             font-size: 0.85rem;
             margin-bottom: 6px;
         }
+
         .model-result-card .result-card {
             background: var(--bg-input);
             padding: 10px 14px;
@@ -509,6 +803,7 @@
             overflow: hidden;
             border: 1px solid var(--border-color);
         }
+
         th {
             text-align: left;
             padding: 10px 14px;
@@ -519,21 +814,36 @@
             letter-spacing: 0.3px;
             font-weight: 600;
         }
+
         td {
             padding: 10px 14px;
             border-bottom: 1px solid var(--border-light);
             color: var(--text-secondary);
             font-size: 0.8rem;
         }
+
         .status-tag {
             padding: 2px 10px;
             border-radius: 10px;
             font-size: 0.65rem;
             font-weight: 600;
         }
-        .status-tag.verified { background: var(--badge-verified-bg); color: var(--badge-verified-color); }
-        .status-tag.pending { background: var(--badge-pending-bg); color: var(--badge-pending-color); }
-        .hash-text { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--hash-color); }
+
+        .status-tag.verified {
+            background: var(--badge-verified-bg);
+            color: var(--badge-verified-color);
+        }
+
+        .status-tag.pending {
+            background: var(--badge-pending-bg);
+            color: var(--badge-pending-color);
+        }
+
+        .hash-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--hash-color);
+        }
 
         .pending-threat {
             background: var(--danger-bg);
@@ -547,13 +857,38 @@
             flex-wrap: wrap;
             gap: 8px;
         }
-        .pending-threat .severity { color: var(--danger); font-weight: 700; }
 
-        .threat-level { padding: 3px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
-        .threat-level.critical { background: var(--danger-bg); color: var(--danger); }
-        .threat-level.high { background: var(--warning-bg); color: var(--warning); }
-        .threat-level.medium { background: var(--warning-bg); color: var(--warning); }
-        .threat-level.low { background: var(--success-bg); color: var(--success); }
+        .pending-threat .severity {
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        .threat-level {
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .threat-level.critical {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .threat-level.high {
+            background: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .threat-level.medium {
+            background: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .threat-level.low {
+            background: var(--success-bg);
+            color: var(--success);
+        }
 
         .metric-badge {
             background: var(--bg-input);
@@ -562,10 +897,24 @@
             border: 1px solid var(--border-color);
             font-size: 0.8rem;
         }
-        .metric-badge .label { color: var(--text-muted); }
-        .metric-badge .value { color: var(--text-secondary); font-weight: 600; margin-left: 4px; }
 
-        .twin-status { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
+        .metric-badge .label {
+            color: var(--text-muted);
+        }
+
+        .metric-badge .value {
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-left: 4px;
+        }
+
+        .twin-status {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
         .twin-item {
             background: var(--bg-input);
             padding: 10px 16px;
@@ -573,41 +922,144 @@
             border: 1px solid var(--border-color);
             min-width: 100px;
         }
-        .twin-item .label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-        .twin-item .value { font-size: 1.1rem; font-weight: 600; color: var(--text-secondary); }
 
-        .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 4px; }
-        .status-dot.success { background: var(--success); }
-        .status-dot.error { background: var(--danger); }
-        .status-dot.running { background: var(--warning); animation: pulse 1.2s infinite; }
-        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+        .twin-item .label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
-        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+        .twin-item .value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
 
-        .tab-content { animation: fadeIn 0.25s ease; }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+        .status-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+
+        .status-dot.success {
+            background: var(--success);
+        }
+
+        .status-dot.error {
+            background: var(--danger);
+        }
+
+        .status-dot.running {
+            background: var(--warning);
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 3px;
+        }
+
+        .tab-content {
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         @media (max-width: 768px) {
-            .sidebar { width: 60px; padding: 16px 8px; }
-            .sidebar .logo span, .sidebar nav ul li span { display: none; }
-            .sidebar nav ul li { justify-content: center; padding: 12px 0; }
-            .sidebar nav ul li i { margin: 0; font-size: 1.1rem; }
-            .user-info span { display: none; }
-            .main-content { padding: 16px; }
-            .cards { grid-template-columns: 1fr 1fr; }
-            .metrics-grid { grid-template-columns: 1fr 1fr; }
-            .controls-grid { grid-template-columns: 1fr 1fr; }
-            .viz-container { grid-template-columns: 1fr; }
+            .sidebar {
+                width: 60px;
+                padding: 16px 8px;
+            }
+
+            .sidebar .logo span,
+            .sidebar nav ul li span {
+                display: none;
+            }
+
+            .sidebar nav ul li {
+                justify-content: center;
+                padding: 12px 0;
+            }
+
+            .sidebar nav ul li i {
+                margin: 0;
+                font-size: 1.1rem;
+            }
+
+            .user-info span {
+                display: none;
+            }
+
+            .main-content {
+                padding: 16px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .controls-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .viz-container {
+                grid-template-columns: 1fr;
+            }
         }
+
         @media (max-width: 480px) {
-            .cards { grid-template-columns: 1fr; }
-            .metrics-grid { grid-template-columns: 1fr; }
-            .controls-grid { grid-template-columns: 1fr; }
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="dashboard" id="dashboard">
 
@@ -627,6 +1079,9 @@
                     </li>
                     <li onclick="showTab('ledger', this)">
                         <i class="fas fa-book"></i> <span>Trust Ledger</span>
+                    </li>
+                    <li onclick="showTab('digital-twin', this)">
+                        <i class="fas fa-cube"></i> <span>Digital Twin</span>
                     </li>
                 </ul>
             </nav>
@@ -686,15 +1141,23 @@
 
                 <!-- DETAIL PANEL – Single Column -->
                 <div class="detail-panel">
-                    <div class="detail-left">
-                        <h4>Threat Details</h4>
-                        <div class="severity">
-                            <span class="label">Severity:</span>
-                            <span class="value" id="severityDisplay">Medium</span>
+                    <div class="detail-left" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                        <div>
+                            <h4 style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">
+                                <i class="fas fa-shield-alt" style="color:var(--accent);"></i> Real-Time Threat Analysis
+                            </h4>
+                            <div style="font-size:0.95rem; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+                                <span>System Status:</span>
+                                <span id="severityDisplay" class="status-badge" style="padding:4px 12px; border-radius:12px; font-weight:700; font-size:0.8rem; background:var(--success-bg); color:var(--success);">
+                                    <span class="dot"></span> LOW SEVERITY
+                                </span>
+                            </div>
                         </div>
-                        <div class="ai-action">
-                            <span>AI Action:</span>
-                            <span id="aiActionDisplay">Monitoring enhanced</span>
+                        <div style="text-align:right;">
+                            <span style="font-size:0.75rem; color:var(--text-muted);">Autonomous Response Action:</span>
+                            <div id="aiActionDisplay" style="font-weight:700; color:var(--accent); font-size:0.9rem;">
+                                Monitoring & Protection Active
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -765,7 +1228,8 @@
                         <button class="btn-stop" onclick="stopMonitoring()">Stop</button>
                         <button class="btn-refresh" onclick="checkMonitoringStatus()">Refresh</button>
                     </div>
-                    <div id="monitoringStatus" style="margin-top:10px;font-size:0.8rem;color:var(--text-secondary);">Monitoring: Stopped</div>
+                    <div id="monitoringStatus" style="margin-top:10px;font-size:0.8rem;color:var(--text-secondary);">
+                        Monitoring: Stopped</div>
                     <div id="monitoringAlerts" style="margin-top:4px;font-size:0.75rem;color:var(--text-muted);"></div>
                 </div>
 
@@ -780,14 +1244,17 @@
                     <span style="font-size:0.65rem;color:var(--text-muted);">(Overrides severity for testing)</span>
                 </div>
 
-                <div style="background:var(--panel-bg);padding:14px 18px;border-radius:8px;border:1px solid var(--border-color);margin-bottom:12px;">
+                <div
+                    style="background:var(--panel-bg);padding:14px 18px;border-radius:8px;border:1px solid var(--border-color);margin-bottom:12px;">
                     <h3 style="font-size:0.85rem;color:var(--danger);margin-bottom:6px;">Pending Human Approval</h3>
-                    <div id="pendingThreatsList" style="text-align:center;padding:8px;font-size:0.85rem;color:var(--text-secondary);">
+                    <div id="pendingThreatsList"
+                        style="text-align:center;padding:8px;font-size:0.85rem;color:var(--text-secondary);">
                         <i class="fas fa-check-circle" style="color:var(--success);"></i> No pending threats
                     </div>
                 </div>
 
-                <div style="background:var(--panel-bg);padding:14px 18px;border-radius:8px;border:1px solid var(--border-color);margin-bottom:16px;">
+                <div
+                    style="background:var(--panel-bg);padding:14px 18px;border-radius:8px;border:1px solid var(--border-color);margin-bottom:16px;">
                     <h3 style="font-size:0.85rem;color:var(--success);margin-bottom:6px;">Auto-Remediation Log</h3>
                     <div id="autoRemediationLog" style="max-height:120px;overflow-y:auto;"></div>
                 </div>
@@ -811,9 +1278,12 @@
                 </div>
 
                 <div style="margin-top:16px;">
-                    <h3 style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.3px;color:var(--text-muted);margin-bottom:6px;">Operation Logs</h3>
+                    <h3
+                        style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.3px;color:var(--text-muted);margin-bottom:6px;">
+                        Operation Logs</h3>
                     <div id="operationLogs">
-                        <div class="log-entry"><span class="time">[System] </span><span style="color:var(--text-muted);">Ready for operations</span></div>
+                        <div class="log-entry"><span class="time">[System] </span><span
+                                style="color:var(--text-muted);">Ready for operations</span></div>
                     </div>
                 </div>
             </div>
@@ -823,8 +1293,162 @@
                 <h2 style="margin-bottom:16px;font-size:1.1rem;font-weight:500;">Trust Ledger</h2>
                 <div id="ledgerEntries">
                     <div style="text-align:center;padding:20px;font-size:0.85rem;color:var(--text-muted);">
-                        <i class="fas fa-spinner fa-spin" style="font-size:1.4rem;margin-bottom:10px;display:block;"></i>
+                        <i class="fas fa-spinner fa-spin"
+                            style="font-size:1.4rem;margin-bottom:10px;display:block;"></i>
                         Loading ledger entries...
+                    </div>
+                </div>
+            </div>
+
+            <!-- DIGITAL TWIN TAB -->
+            <div id="tab-digital-twin" class="tab-content" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+                    <div>
+                        <h2 style="font-size:1.2rem; font-weight:600; color:var(--text-primary);">
+                            <i class="fas fa-cube" style="color:var(--accent);"></i> Real-Time Digital Twin Observer
+                        </h2>
+                        <p style="font-size:0.8rem; color:var(--text-secondary);">
+                            Synchronized node topology, live SSE telemetry streaming & isolated sandbox simulator
+                        </p>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div id="twinStreamStatus" class="status-badge">
+                            <span class="status-dot success"></span> Real-Time Connected
+                        </div>
+                        <span id="twinRiskScoreBadge" style="padding:4px 12px; border-radius:12px; font-weight:700; font-size:0.8rem; background:var(--success-bg); color:var(--success);">
+                            Risk Index: 12/100
+                        </span>
+                    </div>
+                </div>
+
+                <!-- TOPOLOGY & TELEMETRY SECTION -->
+                <div class="viz-container" style="grid-template-columns: 3fr 2fr; margin-top:0;">
+                    <!-- CANVAS TOPOLOGY CARD -->
+                    <div class="viz-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <h4><i class="fas fa-network-wired"></i> Live Cyber Node Topology</h4>
+                            <span style="font-size:0.7rem; color:var(--text-muted);">(Click node to inspect)</span>
+                        </div>
+                        <canvas id="twinTopologyCanvas" style="width:100%; height:280px; background:var(--bg-input); border-radius:8px; border:1px solid var(--border-color);"></canvas>
+                        
+                        <div id="twinNodeDetailCard" style="margin-top:10px; padding:10px; background:var(--bg-input); border-radius:8px; border:1px solid var(--border-color);">
+                            <!-- Node details populates here -->
+                        </div>
+                    </div>
+
+                    <!-- TELEMETRY GAUGES CARD -->
+                    <div class="viz-card" style="display:flex; flex-direction:column; justify-content:space-between;">
+                        <h4><i class="fas fa-tachometer-alt"></i> Live Component Telemetry</h4>
+                        
+                        <div style="margin-bottom:12px;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px;">
+                                <span class="key">CPU Usage</span>
+                                <span class="value" id="twinCpuText">35%</span>
+                            </div>
+                            <div style="height:10px; background:var(--bg-input); border-radius:5px; overflow:hidden;">
+                                <div id="twinCpuBar" style="width:35%; height:100%; background:var(--accent); transition:0.3s;"></div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:12px;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px;">
+                                <span class="key">Memory Usage</span>
+                                <span class="value" id="twinMemoryText">45%</span>
+                            </div>
+                            <div style="height:10px; background:var(--bg-input); border-radius:5px; overflow:hidden;">
+                                <div id="twinMemoryBar" style="width:45%; height:100%; background:var(--btn-primary); transition:0.3s;"></div>
+                            </div>
+                        </div>
+
+                        <div class="twin-status" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:0;">
+                            <div class="twin-item">
+                                <div class="label">Disk IO</div>
+                                <div class="value" id="twinDiskText">25%</div>
+                            </div>
+                            <div class="twin-item">
+                                <div class="label">Latency</div>
+                                <div class="value" id="twinLatencyText">10 ms</div>
+                            </div>
+                            <div class="twin-item">
+                                <div class="label">Connections</div>
+                                <div class="value" id="twinConnText">120</div>
+                            </div>
+                            <div class="twin-item">
+                                <div class="label">Network Health</div>
+                                <div class="value" id="twinHealthText" style="color:var(--success);">95%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HISTORICAL PLAYBACK SCRUBBER -->
+                <div style="background:var(--panel-bg); padding:14px 20px; border-radius:12px; border:1px solid var(--panel-border); margin-top:16px; box-shadow:var(--card-shadow);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <h4 style="font-size:0.85rem; font-weight:600; color:var(--text-primary);">
+                            <i class="fas fa-history"></i> Historical Playback Scrub Timeline
+                        </h4>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span id="twinPlaybackTime" style="font-size:0.75rem; color:var(--text-muted); font-family:monospace;">
+                                Live Stream (Real-Time)
+                            </span>
+                            <button id="twinLiveToggleBtn" onclick="digitalTwinUI.toggleLivePlayback()" class="control-btn" style="padding:4px 12px; font-size:0.7rem;">
+                                <i class="fas fa-pause"></i> Pause
+                            </button>
+                        </div>
+                    </div>
+                    <input type="range" id="twinPlaybackSlider" min="0" max="0" value="0" style="width:100%; cursor:pointer;" oninput="digitalTwinUI.onSliderChange(this.value)">
+                </div>
+
+                <!-- SANDBOX WHAT-IF SIMULATOR -->
+                <div style="background:var(--panel-bg); padding:16px 20px; border-radius:12px; border:1px solid var(--panel-border); margin-top:16px; box-shadow:var(--card-shadow);">
+                    <h3 style="font-size:0.95rem; font-weight:600; color:var(--text-primary); margin-bottom:6px;">
+                        <i class="fas fa-flask" style="color:var(--accent);"></i> Sandbox "What-If" Scenario Simulator
+                    </h3>
+                    <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:12px;">
+                        Evaluate parameter changes & stress scenarios against production ML models without mutating live state.
+                    </p>
+
+                    <div class="sim-box" style="gap:16px; margin-bottom:12px;">
+                        <div>
+                            <label><i class="fas fa-vial"></i> Scenario:</label>
+                            <select id="twinWhatIfScenario" style="padding:6px 10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:0.8rem;">
+                                <option value="ddos_attack">DDoS Surge Scenario</option>
+                                <option value="ransomware_surge">Ransomware Propagation</option>
+                                <option value="heavy_load">Traffic Load Surge (3x)</option>
+                                <option value="normal">Normal Operation Baseline</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>Load Factor:</label>
+                            <select id="twinWhatIfLoadFactor" style="padding:6px 10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:0.8rem;">
+                                <option value="1.0">1.0x (Normal)</option>
+                                <option value="1.5" selected>1.5x (Elevated)</option>
+                                <option value="2.5">2.5x (Surge)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>Attack Intensity:</label>
+                            <select id="twinWhatIfIntensity" style="padding:6px 10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:0.8rem;">
+                                <option value="0.2">Low (0.2)</option>
+                                <option value="0.7" selected>High (0.7)</option>
+                                <option value="1.0">Extreme (1.0)</option>
+                            </select>
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <input type="checkbox" id="twinIsolateWafCheck">
+                            <label for="twinIsolateWafCheck" style="font-size:0.8rem; cursor:pointer;">Isolate WAF Node</label>
+                        </div>
+
+                        <button onclick="digitalTwinUI.runWhatIfSimulation()" class="control-btn run-all-btn" style="padding:8px 18px;">
+                            <i class="fas fa-play"></i> Run Sandbox Evaluation
+                        </button>
+                    </div>
+
+                    <div id="twinWhatIfResults">
+                        <!-- Sandbox evaluation outputs here -->
                     </div>
                 </div>
             </div>
@@ -850,7 +1474,7 @@
         // ============================================
         // CONFIG
         // ============================================
-        const API = 'http://127.0.0.1:5001/api';
+        const API = window.location.origin.includes('5001') ? '/api' : 'http://127.0.0.1:5001/api';
         let anomalyChart = null;
         let monitoringInterval = null;
         let pendingInterval = null;
@@ -880,14 +1504,19 @@
             document.querySelectorAll('.sidebar nav ul li').forEach(l => l.classList.remove('active'));
             if (element) element.classList.add('active');
             if (tab === 'ledger') loadLedger();
+            if (tab === 'digital-twin') {
+                if (window.digitalTwinUI) window.digitalTwinUI.init();
+            }
             if (tab === 'controls') {
                 checkMonitoringStatus();
                 loadPendingThreats();
                 loadAutoRemediationLog();
                 if (!pendingInterval) pendingInterval = setInterval(loadPendingThreats, 10000);
             } else {
-                if (pendingInterval) { clearInterval(pendingInterval);
-                    pendingInterval = null; }
+                if (pendingInterval) {
+                    clearInterval(pendingInterval);
+                    pendingInterval = null;
+                }
             }
         }
 
@@ -938,19 +1567,51 @@
                     document.getElementById('uptime').textContent = (99.5 + Math.random() * 0.5).toFixed(2) + '%';
                     document.getElementById('sessions').textContent = Math.floor(Math.random() * 5 + 1);
 
-                    const severities = ['Critical', 'High', 'Medium', 'Low'];
-                    document.getElementById('severityDisplay').textContent = severities[Math.floor(Math.random() * 4)];
+                    const severities = ['NORMAL', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+                    const sev = severities[Math.floor(Math.random() * severities.length)];
+                    const sevEl = document.getElementById('severityDisplay');
+                    if (sevEl) {
+                        sevEl.innerHTML = `<span class="dot"></span> ${sev} SEVERITY`;
+                        sevEl.style.color = sev === 'CRITICAL' || sev === 'HIGH' ? 'var(--danger)' : sev === 'MEDIUM' ? 'var(--warning)' : 'var(--success)';
+                        sevEl.style.background = sev === 'CRITICAL' || sev === 'HIGH' ? 'var(--danger-bg)' : sev === 'MEDIUM' ? 'var(--warning-bg)' : 'var(--success-bg)';
+                    }
                     document.getElementById('aiActionDisplay').textContent = [
-                        'Auto-Containment initiated',
-                        'Isolation in progress',
-                        'Quarantine applied',
-                        'Monitoring enhanced'
+                        'Auto-Containment active',
+                        'Real-Time threat filtering',
+                        'Quarantine policies enforced',
+                        'Continuous monitoring active'
                     ][Math.floor(Math.random() * 4)];
                 }
             } catch (e) { /* ignore */ }
         }
         loadMetrics();
         setInterval(loadMetrics, 5000);
+
+        // Auto-populate Overview Visualizations on page load
+        async function loadOverviewVisualizations() {
+            try {
+                const threatRes = await fetch(API + '/threat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode: 'normal' })
+                });
+                const threatData = await threatRes.json();
+                if (threatData.success) updateThreatVisualization(threatData);
+
+                const shapRes = await fetch(API + '/shap', { method: 'POST' });
+                const shapData = await shapRes.json();
+                if (shapData.success) updateSHAPVisualization(shapData);
+
+                const aeRes = await fetch(API + '/autoencoder', { method: 'POST' });
+                const aeData = await aeRes.json();
+                if (aeData.success) updateAnomalyChart(aeData);
+
+                const twinRes = await fetch(API + '/twin/state');
+                const twinData = await twinRes.json();
+                if (twinData.success) updateTwinVisualization({ twin_state: twinData.twin_state });
+            } catch (e) { console.error('Overview visualizer error:', e); }
+        }
+        setTimeout(loadOverviewVisualizations, 500);
 
         // ============================================
         // LOGS
@@ -1003,8 +1664,10 @@
         }
 
         function updateThreatBadge(level) {
-            const colors = { 'LOW': 'var(--success)', 'MEDIUM': 'var(--warning)', 'HIGH': 'var(--danger)',
-                'CRITICAL': 'var(--danger)' };
+            const colors = {
+                'LOW': 'var(--success)', 'MEDIUM': 'var(--warning)', 'HIGH': 'var(--danger)',
+                'CRITICAL': 'var(--danger)'
+            };
             let badgeEl = document.getElementById('threatBadge');
             if (!badgeEl) {
                 const container = document.querySelector('.metrics-row') || document.getElementById('result');
@@ -1229,13 +1892,30 @@
 
         function updateTwinVisualization(data) {
             const container = document.getElementById('twinStatus');
-            const state = data.twin_state || {};
+            const state = data.twin_state || data;
+            const metrics = state.metrics || state;
+            const cpu = metrics.cpu_usage || state.cpu_usage || 24.5;
+            const health = metrics.network_health ? Math.round(metrics.network_health * 100) : (state.network_health ? Math.round(state.network_health * 100) : 95);
+            const status = state.status || 'operational';
+            const threatLevel = state.threat_level || 'LOW';
             container.innerHTML = `
-                <div class="twin-status">
-                    <div class="twin-item"><div class="label">Status</div><div class="value" style="color:${state.status === 'operational' ? 'var(--success)' : 'var(--danger)'}">${state.status || 'Unknown'}</div></div>
-                    <div class="twin-item"><div class="label">Threat Level</div><div class="value" style="color:${state.threat_level === 'HIGH' ? 'var(--danger)' : state.threat_level === 'MEDIUM' ? 'var(--warning)' : 'var(--success)'}">${state.threat_level || 'LOW'}</div></div>
-                    <div class="twin-item"><div class="label">CPU Usage</div><div class="value">${state.cpu_usage || 0}%</div></div>
-                    <div class="twin-item"><div class="label">Network Health</div><div class="value">${((state.network_health || 0) * 100).toFixed(0)}%</div></div>
+                <div class="twin-status" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:16px;">
+                    <div class="twin-item" style="padding:14px 18px; background:var(--bg-input); border-radius:10px; border:1px solid var(--border-color);">
+                        <div class="label" style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Status</div>
+                        <div class="value" style="font-size:1.3rem; font-weight:800; color:var(--success); margin-top:4px;">${status.toUpperCase()}</div>
+                    </div>
+                    <div class="twin-item" style="padding:14px 18px; background:var(--bg-input); border-radius:10px; border:1px solid var(--border-color);">
+                        <div class="label" style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Threat Level</div>
+                        <div class="value" style="font-size:1.3rem; font-weight:800; color:${threatLevel === 'HIGH' || threatLevel === 'CRITICAL' ? 'var(--danger)' : threatLevel === 'MEDIUM' ? 'var(--warning)' : 'var(--success)'}; margin-top:4px;">${threatLevel}</div>
+                    </div>
+                    <div class="twin-item" style="padding:14px 18px; background:var(--bg-input); border-radius:10px; border:1px solid var(--border-color);">
+                        <div class="label" style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">CPU Usage</div>
+                        <div class="value" style="font-size:1.3rem; font-weight:800; color:var(--text-primary); margin-top:4px;">${cpu}%</div>
+                    </div>
+                    <div class="twin-item" style="padding:14px 18px; background:var(--bg-input); border-radius:10px; border:1px solid var(--border-color);">
+                        <div class="label" style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Network Health</div>
+                        <div class="value" style="font-size:1.3rem; font-weight:800; color:var(--success); margin-top:4px;">${health}%</div>
+                    </div>
                 </div>
             `;
         }
@@ -1288,7 +1968,7 @@
                             `<div style="text-align:center; padding:8px; font-size:0.85rem;color:var(--text-secondary);"><i class="fas fa-check-circle" style="color:var(--success);"></i> No pending threats</div>`;
                     }
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
 
         async function resolveThreat(threatId, action) {
@@ -1335,7 +2015,7 @@
                             '<div style="text-align:center;padding:8px;font-size:0.85rem;color:var(--text-secondary);">No auto-remediations yet</div>';
                     }
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
 
         // ============================================
@@ -1370,8 +2050,10 @@
                 if (data.status === 'stopped') {
                     statusDiv.innerHTML = `<span style="color:var(--danger);">Monitoring Stopped</span>`;
                     addLog('Monitoring Stopped', 'success', 'Manual stop');
-                    if (monitoringInterval) { clearInterval(monitoringInterval);
-                        monitoringInterval = null; }
+                    if (monitoringInterval) {
+                        clearInterval(monitoringInterval);
+                        monitoringInterval = null;
+                    }
                 } else {
                     statusDiv.innerHTML = `<span style="color:var(--danger);">❌ ${data.message || 'Failed to stop'}</span>`;
                 }
@@ -1406,7 +2088,7 @@
                 } else {
                     alertsDiv.innerHTML = '<div style="font-size:0.8rem;color:var(--text-secondary);">No active alerts</div>';
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
 
         // ============================================
@@ -1452,21 +2134,34 @@
             }
         }
 
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === '1') { e.preventDefault();
+        document.addEventListener('keydown', function (e) {
+            if (e.ctrlKey && e.key === '1') {
+                e.preventDefault();
                 const el = document.querySelector('.sidebar nav ul li:first-child'); if (el) showTab('overview',
-                    el); }
-            if (e.ctrlKey && e.key === '2') { e.preventDefault();
+                    el);
+            }
+            if (e.ctrlKey && e.key === '2') {
+                e.preventDefault();
                 const el = document.querySelector('.sidebar nav ul li:nth-child(2)'); if (el) showTab('controls',
-                    el); }
-            if (e.ctrlKey && e.key === '3') { e.preventDefault();
+                    el);
+            }
+            if (e.ctrlKey && e.key === '3') {
+                e.preventDefault();
                 const el = document.querySelector('.sidebar nav ul li:nth-child(3)'); if (el) showTab('ledger',
-                    el); }
+                    el);
+            }
+            if (e.ctrlKey && e.key === '4') {
+                e.preventDefault();
+                const el = document.querySelector('.sidebar nav ul li:nth-child(4)'); if (el) showTab('digital-twin',
+                    el);
+            }
         });
 
-        console.log('✅ ACIS-Core — SHAP Colorful | Single Column | Vertical Outputs');
+        console.log('✅ ACIS-Core — SHAP Colorful | Single Column | Vertical Outputs | Digital Twin Active');
         console.log('📡 API:', API);
         console.log('🎨 Theme:', savedTheme);
     </script>
+    <script src="js/digitalTwin.js"></script>
 </body>
+
 </html>
