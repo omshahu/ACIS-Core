@@ -1,31 +1,57 @@
-# CyberSentinel-AI
-# cybersecurity_attacks
-# Consists of 25 varied metrics and 40,000 records
+# ACIS-Core | Autonomous Cyberimmune System
 
-# Timestamp
-# Source IP Address
-# Destination IP Address
-# Source Port
-# Destination Port
-# Protocol
-# Packet Length
-# Packet Type
-# Traffic Type
-# Payload Data
-# Malware Indicators
-# Anomaly Scores
-# Alerts/Warnings
-# Attack Type
-# Attack Signature
-# Action Taken
-# Severity Level
-# User Information
-# Device Information
-# Network Segment
-# Geo-location Data
-# Proxy Information
-# Firewall Logs
-# IDS/IPS Alerts
-# Log Source
+ACIS-Core is an advanced, autonomous cyberimmune system dashboard and secure authentication gateway for real-time threat monitoring, AI model controls, and trust ledger verification.
 
+---
 
+## 🚀 Key Features
+
+* **Secure Operator Authentication**: Light/Dark theme-aligned login interface with role clearance selection and offline demo access.
+* **Real-time Cyberimmune Dashboard**: Monitor blocked threats, AI decisions, uptime metrics, and session security.
+* **AI Model Controls**: Instant execution and visualization for Threat Detection, Federated Learning, Autoencoder Anomaly Scoring, and SHAP feature importance.
+* **Trust Ledger**: Cryptographic audit trail for verified operational security events.
+* **Dual-Mode Backend Resilience**: Seamless local demo authentication fallback when backend server is offline.
+
+---
+
+## 🛠️ Technology Stack
+
+* **Frontend**: HTML5, Vanilla CSS (Custom Design System with Light/Dark Themes), JavaScript (ES6+)
+* **Icons & Fonts**: FontAwesome 6, Google Fonts (`Inter`, `JetBrains Mono`)
+* **Visualization**: Chart.js
+* **Backend Integration**: RESTful API endpoint (`http://127.0.0.1:5001/api/login`) with graceful offline fallback
+
+---
+
+## 💻 How to Run Locally
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/your-username/acis-core.git
+   cd acis-core
+   ```
+
+2. **Open in Browser**:
+   * Open `login.html` using VS Code **Live Server** or simply double-click `login.html` to launch in your browser.
+
+3. **Default Operator Credentials**:
+   * **Operator Email**: `admin@cyberimmune.ai`
+   * **Password**: `SecurePass123`
+   * **Role**: `SecOps Administrator (Level 5)`
+
+---
+
+## 📂 Project Structure
+
+```text
+acis-core/
+├── index.html        # Main ACIS-Core Autonomous Cyberimmune Dashboard
+├── login.html        # Secure Operator Login Interface
+└── README.md         # System Documentation
+```
+
+---
+
+## 👤 Author & Contribution
+
+Developed as part of the ACIS-Core Autonomous Cyberimmune initiative.
