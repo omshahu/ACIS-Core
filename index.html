@@ -1236,7 +1236,7 @@
                 <div class="sim-box">
                     <label><i class="fas fa-sliders-h"></i> Simulation:</label>
                     <select id="simMode">
-                        <option value="normal">Normal</option>
+                        <option value="normal" selected>Normal</option>
                         <option value="low_attack">Low Attack</option>
                         <option value="medium_attack">Medium Attack</option>
                         <option value="severe_attack">Severe Attack</option>
@@ -1246,7 +1246,19 @@
 
                 <div
                     style="background:var(--panel-bg);padding:14px 18px;border-radius:8px;border:1px solid var(--border-color);margin-bottom:12px;">
-                    <h3 style="font-size:0.85rem;color:var(--danger);margin-bottom:6px;">Pending Human Approval</h3>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
+                        <h3 style="font-size:0.85rem;color:var(--danger);margin:0;">Pending Human Approval</h3>
+                        <div style="display:flex; gap:6px;">
+                            <button onclick="bulkResolveThreats('approve')" 
+                                    style="background:#16a34a; border:none; padding:4px 10px; border-radius:5px; color:#fff; font-weight:600; cursor:pointer; font-size:0.72rem;">
+                                ✓✓ Approve All
+                            </button>
+                            <button onclick="bulkResolveThreats('reject')" 
+                                    style="background:#dc2626; border:none; padding:4px 10px; border-radius:5px; color:#fff; font-weight:600; cursor:pointer; font-size:0.72rem;">
+                                ✕✕ Reject All
+                            </button>
+                        </div>
+                    </div>
                     <div id="pendingThreatsList"
                         style="text-align:center;padding:8px;font-size:0.85rem;color:var(--text-secondary);">
                         <i class="fas fa-check-circle" style="color:var(--success);"></i> No pending threats
@@ -1412,10 +1424,10 @@
                         <div>
                             <label><i class="fas fa-vial"></i> Scenario:</label>
                             <select id="twinWhatIfScenario" style="padding:6px 10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:0.8rem;">
-                                <option value="ddos_attack">DDoS Surge Scenario</option>
-                                <option value="ransomware_surge">Ransomware Propagation</option>
-                                <option value="heavy_load">Traffic Load Surge (3x)</option>
-                                <option value="normal">Normal Operation Baseline</option>
+                                <option value="Normal Operation (Baseline)" selected>Normal Operation (Baseline)</option>
+                                <option value="DDoS Surge Attack">DDoS Surge Attack</option>
+                                <option value="Ransomware Propagation">Ransomware Propagation</option>
+                                <option value="CPU/Memory Overload (3x Spike)">CPU/Memory Overload (3x Spike)</option>
                             </select>
                         </div>
 
@@ -1929,35 +1941,52 @@
                 const data = await res.json();
                 if (data.success) {
                     const container = document.getElementById('pendingThreatsList');
-                    if (data.pending && data.pending.length > 0) {
+                    const highCriticalOnly = (data.pending || []).filter(t => {
+                        const s = (t.severity || '').toUpperCase();
+                        return s === 'HIGH' || s === 'CRITICAL';
+                    });
+                    if (highCriticalOnly.length > 0) {
                         let html = '';
-                        data.pending.forEach(threat => {
-                            const severity = threat.severity || 'HIGH';
-                            const color = severity === 'CRITICAL' ? 'var(--danger)' : 'var(--warning)';
+                        highCriticalOnly.forEach(threat => {
+                            const severity = (threat.severity || 'HIGH').toUpperCase();
+                            let badgeStyle = 'background:#dcfce7; color:#16a34a; border:1px solid #86efac;';
+                            if (severity === 'MEDIUM') badgeStyle = 'background:#fef9c3; color:#ca8a04; border:1px solid #fde047;';
+                            else if (severity === 'HIGH') badgeStyle = 'background:#ffedd5; color:#ea580c; border:1px solid #fdba74;';
+                            else if (severity === 'CRITICAL') badgeStyle = 'background:#fee2e2; color:#dc2626; border:1px solid #fca5a5;';
+
+                            // Format confidence: one decimal, strictly capped under 99.9%
+                            let rawConf = threat.threat_data?.details?.confidence ?? threat.confidence ?? 0.85;
+                            let confVal = rawConf <= 1.0 ? rawConf * 100 : rawConf;
+                            if (confVal > 99.9) confVal = 99.9;
+                            const confStr = confVal.toFixed(1) + '%';
+
                             html += `
-                                <div class="pending-threat">
+                                <div class="pending-threat" style="background:#fff; border:1px solid var(--border-color); border-radius:6px; padding:10px 14px; margin-bottom:8px;">
                                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                                        <div>
-                                            <span style="color:${color}; font-weight:700;">⚠️ ${severity}</span>
-                                            <span style="margin-left:8px; font-size:0.8rem;color:var(--text-secondary);">ID: ${threat.threat_id}</span>
-                                            <span style="font-size:0.75rem; margin-left:8px;color:var(--text-muted);">
+                                        <div style="display:flex; align-items:center; gap:8px;">
+                                            <span style="${badgeStyle} padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:700;">
+                                                ● ${severity}
+                                            </span>
+                                            <span style="font-size:0.8rem; font-family:monospace; color:var(--text-primary); font-weight:600;">${threat.threat_id}</span>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">
                                                 Source: ${threat.threat_data?.source || 'unknown'}
                                             </span>
                                         </div>
-                                        <div style="display:flex; gap:8px;">
+                                        <div style="display:flex; gap:6px;">
                                             <button onclick="resolveThreat('${threat.threat_id}', 'approve')" 
-                                                    style="background:var(--success); border:none; padding:6px 16px; border-radius:6px; color:#fff; font-weight:600; cursor:pointer; font-size:0.75rem;">
+                                                    style="background:var(--success); border:none; padding:5px 12px; border-radius:5px; color:#fff; font-weight:600; cursor:pointer; font-size:0.75rem;">
                                                 Approve
                                             </button>
                                             <button onclick="resolveThreat('${threat.threat_id}', 'reject')" 
-                                                    style="background:var(--danger); border:none; padding:6px 16px; border-radius:6px; color:#fff; font-weight:600; cursor:pointer; font-size:0.75rem;">
+                                                    style="background:var(--danger); border:none; padding:5px 12px; border-radius:5px; color:#fff; font-weight:600; cursor:pointer; font-size:0.75rem;">
                                                 Reject
                                             </button>
                                         </div>
                                     </div>
-                                    <div style="font-size:0.75rem; margin-top:4px;color:var(--text-secondary);">
-                                        ${threat.threat_data?.details?.confidence ? `Confidence: ${(threat.threat_data.details.confidence * 100).toFixed(0)}%` : ''}
-                                        ${threat.timestamp ? ` | Time: ${new Date(threat.timestamp).toLocaleTimeString()}` : ''}
+                                    <div style="font-size:0.75rem; margin-top:6px; color:var(--text-secondary); display:flex; gap:12px;">
+                                        <span>Confidence: <strong style="color:var(--text-primary);">${confStr}</strong></span>
+                                        ${threat.threat_data?.threat_type ? `<span>Type: ${threat.threat_data.threat_type}</span>` : ''}
+                                        ${threat.timestamp ? `<span>Time: ${new Date(threat.timestamp).toLocaleTimeString()}</span>` : ''}
                                     </div>
                                 </div>
                             `;
@@ -1969,6 +1998,35 @@
                     }
                 }
             } catch (e) { }
+        }
+
+        async function bulkResolveThreats(action) {
+            try {
+                const res = await fetch(API + '/pending-threats');
+                const data = await res.json();
+                if (!data.success || !data.pending || data.pending.length === 0) {
+                    alert('No pending threats to ' + action);
+                    return;
+                }
+                const count = data.pending.length;
+                if (!confirm(`Are you sure you want to ${action} all ${count} pending threats?`)) return;
+
+                let successCount = 0;
+                for (const threat of data.pending) {
+                    const r = await fetch(API + '/remediate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ threat_id: threat.threat_id, action: action })
+                    });
+                    const d = await r.json();
+                    if (d.success) successCount++;
+                }
+                alert(`✅ Successfully ${action}ed ${successCount} of ${count} threats.`);
+                loadPendingThreats();
+                loadAutoRemediationLog();
+            } catch (e) {
+                alert('Error processing bulk action: ' + e.message);
+            }
         }
 
         async function resolveThreat(threatId, action) {

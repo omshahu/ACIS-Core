@@ -14,24 +14,23 @@ class DigitalTwinUI {
         this.canvas = null;
         this.ctx = null;
         this.animationFrameId = null;
-        this.selectedNodeId = 'ai-engine';
+        this.selectedNodeId = 'core-ai-engine';
         this.packetParticles = [];
 
         this.nodeCoords = {
-            'fw-01': { x: 120, y: 150 },
-            'waf-01': { x: 300, y: 100 },
-            'ai-engine': { x: 300, y: 220 },
-            'db-cluster': { x: 480, y: 100 },
-            'ep-subnet': { x: 480, y: 220 }
+            'waf-gateway': { x: 120, y: 180 },
+            'telemetry-broker': { x: 280, y: 80 },
+            'core-ai-engine': { x: 300, y: 220 },
+            'trust-ledger-db': { x: 480, y: 90 },
+            'sandbox-env': { x: 480, y: 230 }
         };
 
         this.connections = [
-            ['fw-01', 'waf-01'],
-            ['fw-01', 'ai-engine'],
-            ['waf-01', 'db-cluster'],
-            ['waf-01', 'ep-subnet'],
-            ['ai-engine', 'db-cluster'],
-            ['ai-engine', 'ep-subnet']
+            ['waf-gateway', 'telemetry-broker'],
+            ['telemetry-broker', 'core-ai-engine'],
+            ['core-ai-engine', 'trust-ledger-db'],
+            ['core-ai-engine', 'sandbox-env'],
+            ['waf-gateway', 'core-ai-engine']
         ];
     }
 
@@ -197,56 +196,59 @@ class DigitalTwinUI {
             }
         });
 
-        // Draw nodes
+        // Draw nodes with Solid State Health Dots (no spinners)
         const nodes = this.liveState?.nodes || {
-            'fw-01': { name: 'Firewall', status: 'operational' },
-            'waf-01': { name: 'WAF Gateway', status: 'operational' },
-            'ai-engine': { name: 'AI Core', status: 'operational' },
-            'db-cluster': { name: 'DB Cluster', status: 'operational' },
-            'ep-subnet': { name: 'Endpoints', status: 'operational' }
+            'waf-gateway': { name: 'WAF Gateway', health: 0.97, status: 'operational' },
+            'telemetry-broker': { name: 'Telemetry Broker', health: 0.96, status: 'operational' },
+            'core-ai-engine': { name: 'ACIS AI Core', health: 0.98, status: 'operational' },
+            'trust-ledger-db': { name: 'Trust Ledger DB', health: 0.99, status: 'operational' },
+            'sandbox-env': { name: 'Sandbox Env', health: 0.98, status: 'operational' }
         };
 
         Object.keys(this.nodeCoords).forEach(nId => {
             const coords = this.nodeCoords[nId];
             const nx = coords.x * scaleX;
             const ny = coords.y * scaleY;
-            const nodeData = nodes[nId] || { name: nId, status: 'operational' };
+            const nodeData = nodes[nId] || { name: nId, status: 'operational', health: 0.98 };
 
             const isSelected = this.selectedNodeId === nId;
-            const status = nodeData.status || 'operational';
+            const healthScore = (nodeData.health !== undefined) ? (nodeData.health > 1 ? nodeData.health : nodeData.health * 100) : 98;
 
-            // Status colors
-            let color = '#22c55e'; // green
-            if (status === 'warning' || status === 'degraded') color = '#fbbf24'; // yellow
-            if (status === 'compromised' || status === 'critical') color = '#ef4444'; // red
-            if (status === 'isolated') color = '#3b82f6'; // blue
-
-            // Outer pulse ring for selected node
-            if (isSelected) {
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.arc(nx, ny, 26, 0, Math.PI * 2);
-                ctx.stroke();
+            // Solid State Health Dot rule:
+            // Green if >95%, Yellow if 80-95%, Red if <80%
+            let healthColor = '#10B981'; // Green
+            if (healthScore < 80) {
+                healthColor = '#EF4444'; // Red
+            } else if (healthScore <= 95) {
+                healthColor = '#F59E0B'; // Yellow
             }
 
-            // Node Circle
-            ctx.fillStyle = color;
+            // Node Outer Disk (Clean solid style, no spinning animation)
+            ctx.fillStyle = isSelected ? 'rgba(59, 130, 246, 0.25)' : 'rgba(30, 41, 59, 0.9)';
+            ctx.strokeStyle = isSelected ? '#3B82F6' : '#475569';
+            ctx.lineWidth = isSelected ? 2.5 : 1.5;
             ctx.beginPath();
             ctx.arc(nx, ny, 20, 0, Math.PI * 2);
             ctx.fill();
+            ctx.stroke();
 
-            // Inner core
-            ctx.fillStyle = '#ffffff';
+            // Inner Core
+            ctx.fillStyle = '#1E293B';
             ctx.beginPath();
-            ctx.arc(nx, ny, 8, 0, Math.PI * 2);
+            ctx.arc(nx, ny, 14, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Solid State Indicator Dot (Top Right)
+            ctx.fillStyle = healthColor;
+            ctx.beginPath();
+            ctx.arc(nx + 13, ny - 13, 4.5, 0, Math.PI * 2);
             ctx.fill();
 
             // Node label
             ctx.fillStyle = 'var(--text-primary)';
             ctx.font = '600 11px Inter, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(nodeData.name || nId, nx, ny + 35);
+            ctx.fillText(nodeData.name || nId, nx, ny + 34);
         });
     }
 
@@ -384,7 +386,7 @@ class DigitalTwinUI {
         const isolateWaf = document.getElementById('twinIsolateWafCheck')?.checked || false;
 
         const isolated_nodes = [];
-        if (isolateWaf) isolated_nodes.push('waf-01');
+        if (isolateWaf) isolated_nodes.push('waf-gateway');
 
         const resultsContainer = document.getElementById('twinWhatIfResults');
         if (resultsContainer) {
