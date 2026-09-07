@@ -1,25 +1,25 @@
 import sys
 
 # Configure UTF-8 for console output on Windows
-if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
-    try:
-        sys.stdout.reconfigure(encoding='utf-8')
-    except Exception:
-        pass
-if sys.stderr and hasattr(sys.stderr, 'reconfigure'):
-    try:
-        sys.stderr.reconfigure(encoding='utf-8')
-    except Exception:
-        pass
+try:
+    if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
+        getattr(sys.stdout, 'reconfigure')(encoding='utf-8')
+except Exception:
+    pass
+try:
+    if sys.stderr and hasattr(sys.stderr, 'reconfigure'):
+        getattr(sys.stderr, 'reconfigure')(encoding='utf-8')
+except Exception:
+    pass
 
 # Ensure werkzeug has __version__ for Flask test_client compatibility (Werkzeug 3.1+)
 import werkzeug
 if not hasattr(werkzeug, '__version__'):
     try:
         import importlib.metadata
-        werkzeug.__version__ = importlib.metadata.version('werkzeug')
+        setattr(werkzeug, '__version__', importlib.metadata.version('werkzeug'))
     except Exception:
-        werkzeug.__version__ = "3.1.3"
+        setattr(werkzeug, '__version__', "3.1.3")
 
 import unittest
 import json
@@ -29,8 +29,8 @@ from app import app, threat_store, pending_approvals, classifier, autoencoder
 class TestDigitalTwinIntegration(unittest.TestCase):
 
     def setUp(self):
+        app.testing = True
         self.app = app.test_client()
-        self.app.testing = True
 
     def test_01_existing_health_endpoint(self):
         """Verify /api/health works without regression"""

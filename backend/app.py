@@ -2,25 +2,25 @@ import os
 import sys
 
 # Configure UTF-8 encoding for Windows terminals
-if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
-    try:
-        sys.stdout.reconfigure(encoding='utf-8')
-    except Exception:
-        pass
-if sys.stderr and hasattr(sys.stderr, 'reconfigure'):
-    try:
-        sys.stderr.reconfigure(encoding='utf-8')
-    except Exception:
-        pass
+try:
+    if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
+        getattr(sys.stdout, 'reconfigure')(encoding='utf-8')
+except Exception:
+    pass
+try:
+    if sys.stderr and hasattr(sys.stderr, 'reconfigure'):
+        getattr(sys.stderr, 'reconfigure')(encoding='utf-8')
+except Exception:
+    pass
 
 # Ensure werkzeug has __version__ attribute for Flask test_client compatibility (Werkzeug 3.1+)
 import werkzeug
 if not hasattr(werkzeug, '__version__'):
     try:
         import importlib.metadata
-        werkzeug.__version__ = importlib.metadata.version('werkzeug')
+        setattr(werkzeug, '__version__', importlib.metadata.version('werkzeug'))
     except Exception:
-        werkzeug.__version__ = "3.1.3"
+        setattr(werkzeug, '__version__', "3.1.3")
 
 from flask import Flask, request, jsonify, Response, send_from_directory
 from flask_cors import CORS
@@ -77,8 +77,8 @@ autoencoder = None
 shap_explainer = None
 digital_twin = None
 scaler = None
-X_train = None
-y_train = None
+X_train = pd.DataFrame()
+y_train = pd.Series(dtype=int)
 feature_names = []
 dataset_info = {'source': 'None', 'rows': 0, 'features': 0}
 
@@ -141,40 +141,79 @@ def load_data():
         # Standardize column lookup dictionary
         col_map = {c.strip().lower(): c for c in df.columns}
 
-        def get_col(name, default=None):
-            key = name.strip().lower()
-            return df[col_map[key]] if key in col_map else default
+        def get_col(name, default=None) -> pd.Series:
+            key = str(name).strip().lower()
+            if key in col_map:
+                res = df[col_map[key]]
+                if isinstance(res, pd.DataFrame):
+                    res = res.iloc[:, 0]
+                return pd.Series(res, index=df.index)
+            if isinstance(default, (pd.Series, pd.DataFrame)):
+                if isinstance(default, pd.DataFrame):
+                    return pd.Series(default.iloc[:, 0], index=df.index)
+                return pd.Series(default, index=df.index)
+            return pd.Series(default, index=df.index)
+
+        def get_numeric_col(name, alt_name=None, default=0.0) -> pd.Series:
+            fallback = get_col(alt_name, default) if alt_name else default
+            s = get_col(name, fallback)
+            num = pd.to_numeric(s, errors='coerce')
+            return pd.Series(num, index=df.index).fillna(default)
 
         # 1. Numeric Core Features
-        src_port = pd.to_numeric(get_col('Source Port', get_col('source_port', 0)), errors='coerce').fillna(1024)
-        dst_port = pd.to_numeric(get_col('Destination Port', get_col('destination_port', 80)), errors='coerce').fillna(80)
-        pkt_len = pd.to_numeric(get_col('Packet Length', get_col('packet_length', 500)), errors='coerce').fillna(500)
-        anomaly_sc = pd.to_numeric(get_col('Anomaly Scores', get_col('anomaly_scores', 25.0)), errors='coerce').fillna(25.0)
+        src_port = get_numeric_col('Source Port', 'source_port', 1024)
+        dst_port = get_numeric_col('Destination Port', 'destination_port', 80)
+        pkt_len = get_numeric_col('Packet Length', 'packet_length', 500)
+        anomaly_sc = get_numeric_col('Anomaly Scores', 'anomaly_scores', 25.0)
 
-        # 2. Categorical Encoders
-        protocol_s = get_col('Protocol', get_col('protocol', 'TCP')).astype(str).str.upper()
-        protocol_code = protocol_s.map({'TCP': 1, 'UDP': 2, 'ICMP': 3}).fillna(0)
+        # 2. Categorical Encoders (supports both raw text columns and pre-encoded code columns)
+        if 'protocol code' in col_map or 'protocol_code' in col_map:
+            protocol_code = get_numeric_col('Protocol Code', 'protocol_code', 1)
+        else:
+            protocol_s = get_col('Protocol', get_col('protocol', 'TCP')).astype(str).str.upper()
+            protocol_code = protocol_s.map({'TCP': 1, 'UDP': 2, 'ICMP': 3}).fillna(0)
 
-        packet_type_s = get_col('Packet Type', get_col('packet_type', 'Data')).astype(str)
-        packet_type_code = packet_type_s.map({'Data': 1, 'Control': 2}).fillna(0)
+        if 'packet type code' in col_map or 'packet_type_code' in col_map:
+            packet_type_code = get_numeric_col('Packet Type Code', 'packet_type_code', 1)
+        else:
+            packet_type_s = get_col('Packet Type', get_col('packet_type', 'Data')).astype(str)
+            packet_type_code = packet_type_s.map({'Data': 1, 'Control': 2}).fillna(0)
 
-        traffic_type_s = get_col('Traffic Type', get_col('traffic_type', 'HTTP')).astype(str)
-        traffic_type_code = traffic_type_s.map({'HTTP': 1, 'DNS': 2, 'FTP': 3, 'SSH': 4}).fillna(0)
+        if 'traffic type code' in col_map or 'traffic_type_code' in col_map:
+            traffic_type_code = get_numeric_col('Traffic Type Code', 'traffic_type_code', 1)
+        else:
+            traffic_type_s = get_col('Traffic Type', get_col('traffic_type', 'HTTP')).astype(str)
+            traffic_type_code = traffic_type_s.map({'HTTP': 1, 'DNS': 2, 'FTP': 3, 'SSH': 4}).fillna(0)
 
-        malware_s = get_col('Malware Indicators', get_col('malware_indicators', '')).astype(str)
-        ioc_detected = malware_s.str.contains('IoC', case=False, na=False).astype(int)
+        if 'ioc detected' in col_map or 'ioc_detected' in col_map:
+            ioc_detected = get_numeric_col('IoC Detected', 'ioc_detected', 0).astype(int)
+        else:
+            malware_s = get_col('Malware Indicators', get_col('malware_indicators', '')).astype(str)
+            ioc_detected = malware_s.str.contains('IoC', case=False, na=False).astype(int)
 
-        alerts_s = get_col('Alerts/Warnings', get_col('alerts_warnings', '')).astype(str)
-        alert_triggered = alerts_s.str.contains('Alert', case=False, na=False).astype(int)
+        if 'alert triggered' in col_map or 'alert_triggered' in col_map:
+            alert_triggered = get_numeric_col('Alert Triggered', 'alert_triggered', 0).astype(int)
+        else:
+            alerts_s = get_col('Alerts/Warnings', get_col('alerts_warnings', '')).astype(str)
+            alert_triggered = alerts_s.str.contains('Alert', case=False, na=False).astype(int)
 
-        severity_s = get_col('Severity Level', get_col('severity_level', 'Low')).astype(str).str.capitalize()
-        severity_code = severity_s.map({'Low': 0, 'Medium': 1, 'High': 2, 'Critical': 3}).fillna(1)
+        if 'severity code' in col_map or 'severity_code' in col_map:
+            severity_code = get_numeric_col('Severity Code', 'severity_code', 1)
+        else:
+            severity_s = get_col('Severity Level', get_col('severity_level', 'Low')).astype(str).str.capitalize()
+            severity_code = severity_s.map({'Low': 0, 'Medium': 1, 'High': 2, 'Critical': 3}).fillna(1)
 
-        action_s = get_col('Action Taken', get_col('action_taken', 'Logged')).astype(str).str.capitalize()
-        action_code = action_s.map({'Logged': 0, 'Ignored': 1, 'Blocked': 2}).fillna(0)
+        if 'action code' in col_map or 'action_code' in col_map:
+            action_code = get_numeric_col('Action Code', 'action_code', 0)
+        else:
+            action_s = get_col('Action Taken', get_col('action_taken', 'Logged')).astype(str).str.capitalize()
+            action_code = action_s.map({'Logged': 0, 'Ignored': 1, 'Blocked': 2}).fillna(0)
 
-        segment_s = get_col('Network Segment', get_col('network_segment', 'Segment A')).astype(str)
-        segment_code = segment_s.map({'Segment A': 1, 'Segment B': 2, 'Segment C': 3}).fillna(0)
+        if 'network segment code' in col_map or 'network_segment_code' in col_map:
+            segment_code = get_numeric_col('Network Segment Code', 'network_segment_code', 1)
+        else:
+            segment_s = get_col('Network Segment', get_col('network_segment', 'Segment A')).astype(str)
+            segment_code = segment_s.map({'Segment A': 1, 'Segment B': 2, 'Segment C': 3}).fillna(0)
 
         # Construct Features DataFrame
         X_df = pd.DataFrame({
@@ -201,7 +240,8 @@ def load_data():
 
         if label_col is not None:
             try:
-                y_series = pd.to_numeric(df[label_col], errors='coerce').fillna(0).astype(int)
+                raw_y = df[label_col].iloc[:, 0] if isinstance(df[label_col], pd.DataFrame) else df[label_col]
+                y_series = pd.Series(pd.to_numeric(raw_y, errors='coerce'), index=df.index).fillna(0).astype(int)
             except Exception:
                 y_series = None
         else:
@@ -250,17 +290,19 @@ def load_data():
             label_col = 'label'
 
         X_df = clean_df.drop(columns=[label_col])
-        y_series = clean_df[label_col]
+        y_series = pd.Series(pd.to_numeric(clean_df[label_col], errors='coerce'), index=clean_df.index).fillna(0).astype(int)
 
     # Ensure both classes (0 and 1) are represented
     if len(np.unique(y_series)) < 2:
-        y_series.iloc[:max(1, len(y_series)//10)] = 1
+        y_vals = np.array(y_series, dtype=int)
+        y_vals[:max(1, len(y_vals) // 10)] = 1
+        y_series = pd.Series(y_vals, index=y_series.index, dtype=int)
 
     # Sample up to 15,000 records for fast & robust training
     if len(X_df) > 15000:
         sample_indices = np.random.RandomState(42).choice(len(X_df), size=15000, replace=False)
         X_train = X_df.iloc[sample_indices].reset_index(drop=True)
-        y_train = y_series.iloc[sample_indices].reset_index(drop=True)
+        y_train = pd.Series(y_series.to_numpy()[sample_indices], dtype=int)
     else:
         X_train = X_df.reset_index(drop=True)
         y_train = y_series.reset_index(drop=True)
@@ -274,7 +316,10 @@ def load_data():
 
 # ---------- INITIALIZE MODELS ----------
 def init_models():
-    global classifier, autoencoder, shap_explainer, digital_twin, scaler
+    global classifier, autoencoder, shap_explainer, digital_twin, scaler, X_train, y_train
+    
+    if X_train is None or (hasattr(X_train, 'empty') and X_train.empty):
+        load_data()
     
     print("[INIT] Initializing models with data.csv features...")
     
@@ -286,13 +331,19 @@ def init_models():
     
     # 2. Autoencoder
     print("  - Training Autoencoder Detector...")
-    autoencoder = AutoencoderModel(n_components=min(4, X_train.shape[1]))
+    n_components = min(4, X_train.shape[1]) if (X_train is not None and hasattr(X_train, 'shape') and X_train.shape[1] > 0) else 4
+    autoencoder = AutoencoderModel(n_components=n_components)
     autoencoder.train(X_train)
     
     # 3. SHAP Explainer
     print("  - Initializing SHAP Explainer...")
     shap_explainer = SHAPExplainer()
-    bg_samples = X_train.iloc[:200] if hasattr(X_train, 'iloc') else X_train[:200]
+    if isinstance(X_train, pd.DataFrame):
+        bg_samples = X_train.iloc[:200]
+    elif X_train is not None:
+        bg_samples = X_train[:200]
+    else:
+        bg_samples = None
     shap_explainer.fit(classifier.model, bg_samples, feature_names)
     
     # 4. Digital Twin
@@ -305,30 +356,83 @@ def init_models():
 load_data()
 init_models()
 
+def get_sample_feature_vector() -> list:
+    """Return a single sample feature vector safely, falling back to synthetic defaults if X_train is unavailable."""
+    global X_train, feature_names
+    if isinstance(X_train, pd.DataFrame) and not X_train.empty and len(X_train) > 0:
+        return X_train.sample(1).values.flatten().tolist()
+    fallback = [1024, 80, 500, 25.0, 1, 1, 1, 0, 0, 1, 0, 1]
+    n = len(feature_names) if feature_names else len(fallback)
+    return (fallback * ((n // len(fallback)) + 1))[:n]
+
 # ---------- THREAT ANALYSIS ----------
 def analyze_threat(features=None, mode='normal'):
     try:
         if features is None:
-            features_array = X_train.sample(1).values.reshape(1, -1)
+            features_array = np.array(get_sample_feature_vector()).reshape(1, -1)
         else:
             features_array = np.array(features).reshape(1, -1)
             if features_array.shape[1] != len(feature_names):
-                features_array = X_train.sample(1).values.reshape(1, -1)
+                features_array = np.array(get_sample_feature_vector()).reshape(1, -1)
         
         features_df = pd.DataFrame(features_array, columns=feature_names)
-        res = classifier.predict(features_df)
+        
+        if classifier is None:
+            init_models()
+
+        if classifier is not None and hasattr(classifier, 'predict'):
+            res = classifier.predict(features_df)
+        else:
+            res = ([0], [[0.85, 0.15]])
+
         if isinstance(res, tuple):
             preds, proba = res
-            pred = preds[0]
-            prob = proba[0]
+            if isinstance(preds, (list, tuple, np.ndarray)):
+                pred = preds[0] if len(preds) > 0 else 0
+            else:
+                pred = preds
+            if isinstance(proba, (list, tuple, np.ndarray)):
+                prob = proba[0] if len(proba) > 0 else [0.85, 0.15]
+            else:
+                prob = [0.85, 0.15]
         else:
-            pred = res[0]
-            prob = classifier.predict_proba(features_df)[0]
+            if isinstance(res, (list, tuple, np.ndarray)):
+                pred = res[0] if len(res) > 0 else 0
+            else:
+                pred = res
+            if classifier is not None and hasattr(classifier, 'predict_proba'):
+                proba_res = classifier.predict_proba(features_df)
+                if isinstance(proba_res, (list, tuple, np.ndarray)):
+                    prob = proba_res[0] if len(proba_res) > 0 else [0.85, 0.15]
+                else:
+                    prob = [0.85, 0.15]
+            else:
+                prob = [0.85, 0.15]
+
+        # Ensure pred is a single int scalar
+        if isinstance(pred, (list, tuple, np.ndarray)):
+            pred = int(pred[0]) if len(pred) > 0 else 0
+        elif not isinstance(pred, int):
+            try:
+                pred = int(pred)
+            except Exception:
+                pred = 0
 
         # Extract attack probability and class probabilities directly from model
-        if len(prob) > 1:
-            attack_prob = float(prob[1])
-            raw_conf = float(max(prob))
+        if hasattr(prob, '__len__') and len(prob) > 1:
+            p1 = prob[1]
+            if isinstance(p1, (list, tuple, np.ndarray)):
+                attack_prob = float(p1[0]) if len(p1) > 0 else 0.15
+            else:
+                attack_prob = p1
+            raw_max = max(prob)
+            if isinstance(raw_max, (list, tuple, np.ndarray)):
+                raw_conf = float(raw_max[0]) if len(raw_max) > 0 else 0.85
+            else:
+                raw_conf = raw_max
+        elif isinstance(prob, (float, int, np.number)):
+            attack_prob = float(prob)
+            raw_conf = max(float(prob), 1.0 - float(prob))
         else:
             attack_prob = 0.85 if pred == 1 else 0.15
             raw_conf = 0.85
@@ -381,7 +485,7 @@ def analyze_threat(features=None, mode='normal'):
             alert = True
 
         return {
-            'prediction': int(pred),
+            'prediction': pred,
             'confidence': conf_val,
             'confidence_pct': conf_pct,
             'confidence_display': f"{conf_pct}%",
@@ -577,16 +681,19 @@ def seed_initial_pending_threats():
     cur_time = int(time.time())
     for i, item in enumerate(seed_data):
         th_id = f"TH-{cur_time - (i * 300)}-{101 + i}"
+        conf_val = float(item['confidence'])
+        conf_pct = round(conf_val * 100, 1)
+        conf_display = f"{conf_pct}%"
         t_data = {
             'threat_id': th_id,
             'source': item['source'],
             'threat_type': item['type'],
             'severity': item['severity'],
-            'confidence': item['confidence'],
+            'confidence': conf_val,
             'details': {
-                'confidence': item['confidence'],
-                'confidence_pct': round(item['confidence'] * 100, 1),
-                'confidence_display': f"{round(item['confidence'] * 100, 1)}%",
+                'confidence': conf_val,
+                'confidence_pct': conf_pct,
+                'confidence_display': conf_display,
                 'attack_probability': item['attack_probability'],
                 'prediction': item['prediction'],
                 'threat_type': item['type']
@@ -600,9 +707,9 @@ def seed_initial_pending_threats():
             'severity': item['severity'],
             'source': item['source'],
             'attack_probability': item['attack_probability'],
-            'confidence': item['confidence'],
-            'confidence_pct': round(item['confidence'] * 100, 1),
-            'confidence_display': f"{round(item['confidence'] * 100, 1)}%",
+            'confidence': conf_val,
+            'confidence_pct': conf_pct,
+            'confidence_display': conf_display,
             'prediction': item['prediction'],
             'timestamp': datetime.now().isoformat(),
             'processed': processed
@@ -634,7 +741,7 @@ def monitor_loop():
     while is_monitoring:
         try:
             scan_count += 1
-            random_features = X_train.sample(1).values.flatten().tolist()
+            random_features = get_sample_feature_vector()
             threat = analyze_threat(random_features, mode='normal')
             if 'error' in threat and not threat.get('severity'):
                 time.sleep(5)
@@ -745,7 +852,7 @@ def get_metrics():
             'threats_blocked': threats_blocked,
             'total_decisions': total_decisions,
             'decision_ratio': round(ratio * 100, 1),
-            'samples_trained': len(X_train),
+            'samples_trained': len(X_train) if X_train is not None else 0,
             'features': len(feature_names),
             'feature_names': feature_names
         }
@@ -761,7 +868,7 @@ def threat_detection():
         data = request.json or {}
         features = data.get('features')
         if not features or len(features) != len(feature_names):
-            features = X_train.sample(1).values.flatten().tolist()
+            features = get_sample_feature_vector()
         mode = data.get('mode', 'normal')
         result = analyze_threat(features, mode)
         if 'error' in result and not result.get('severity'):
@@ -807,7 +914,7 @@ def handle_threat():
     try:
         data = request.json or {}
         if not data.get('severity'):
-            features = X_train.sample(1).values.flatten().tolist()
+            features = get_sample_feature_vector()
             analysis = analyze_threat(features)
             data['severity'] = analysis['severity']
             data['source'] = f"192.168.1.{random.randint(1, 255)}"
@@ -955,7 +1062,7 @@ def autoencoder_detection():
         return '', 200
     error = round(random.uniform(0.12, 0.85), 4)
     threshold = 0.40
-    is_anomaly = bool(error > threshold)
+    is_anomaly = error > threshold
     samples = [
         {'sample_id': f'S{i+1}', 'reconstruction_error': round(random.uniform(0.05, 0.35), 4)}
         for i in range(5)
@@ -1237,7 +1344,7 @@ if __name__ == '__main__':
     print("\n" + "="*50)
     print("[SERVER] ACIS-Core Backend Server (Modular Models)")
     print("="*50)
-    print(f"[STATS] Data loaded: {len(X_train):,} rows, {len(feature_names)} features")
+    print(f"[STATS] Data loaded: {len(X_train) if X_train is not None else 0:,} rows, {len(feature_names)} features")
     print(f"[STATS] Dataset origin: {dataset_info.get('source')}")
     print("[OK] All models initialized successfully!")
     print("[RUN] Server running on http://127.0.0.1:5001")

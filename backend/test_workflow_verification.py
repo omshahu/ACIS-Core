@@ -19,17 +19,23 @@ import sys
 import json
 import importlib.metadata
 
-if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
-if sys.stderr and hasattr(sys.stderr, 'reconfigure'):
-    sys.stderr.reconfigure(encoding='utf-8')
+try:
+    if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
+        getattr(sys.stdout, 'reconfigure')(encoding='utf-8')
+except Exception:
+    pass
+try:
+    if sys.stderr and hasattr(sys.stderr, 'reconfigure'):
+        getattr(sys.stderr, 'reconfigure')(encoding='utf-8')
+except Exception:
+    pass
 
 import werkzeug
 if not hasattr(werkzeug, '__version__'):
     try:
-        werkzeug.__version__ = importlib.metadata.version('werkzeug')
+        setattr(werkzeug, '__version__', importlib.metadata.version('werkzeug'))
     except Exception:
-        werkzeug.__version__ = '3.1.3'
+        setattr(werkzeug, '__version__', '3.1.3')
 
 from app import (
     app,

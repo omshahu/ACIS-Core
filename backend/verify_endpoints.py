@@ -2,17 +2,23 @@ import sys
 import json
 import importlib.metadata
 
-if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
-if sys.stderr and hasattr(sys.stderr, 'reconfigure'):
-    sys.stderr.reconfigure(encoding='utf-8')
+try:
+    if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
+        getattr(sys.stdout, 'reconfigure')(encoding='utf-8')
+except Exception:
+    pass
+try:
+    if sys.stderr and hasattr(sys.stderr, 'reconfigure'):
+        getattr(sys.stderr, 'reconfigure')(encoding='utf-8')
+except Exception:
+    pass
 
 import werkzeug
 if not hasattr(werkzeug, '__version__'):
     try:
-        werkzeug.__version__ = importlib.metadata.version('werkzeug')
+        setattr(werkzeug, '__version__', importlib.metadata.version('werkzeug'))
     except Exception:
-        werkzeug.__version__ = '3.1.3'
+        setattr(werkzeug, '__version__', '3.1.3')
 
 from app import app, digital_twin
 
@@ -59,8 +65,8 @@ print("\n=== 4. Testing SSE /api/twin/stream generator output ===")
 stream_res = client.get('/api/twin/stream')
 assert stream_res.status_code == 200
 # Read first SSE chunk
-first_chunk = next(stream_res.response)
-text = first_chunk.decode('utf-8')
+first_chunk = next(iter(stream_res.response))
+text = first_chunk.decode('utf-8') if isinstance(first_chunk, bytes) else first_chunk
 print("First SSE event chunk:")
 print(text[:200] + "...")
 assert text.startswith('data: ')
