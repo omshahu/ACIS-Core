@@ -256,13 +256,22 @@
             };
 
             try {
-                const res = await fetch('http://127.0.0.1:5001/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(userData)
-                });
-                const data = await res.json();
-                localStorage.setItem('user', JSON.stringify(data.success ? data : userData));
+                if (window.location.protocol === 'https:') {
+                    // Hosted environment (e.g. GitHub Pages) - instant demo login
+                    localStorage.setItem('user', JSON.stringify(userData));
+                } else {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 2000);
+                    const res = await fetch('http://127.0.0.1:5001/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(userData),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    const data = await res.json();
+                    localStorage.setItem('user', JSON.stringify(data.success ? data : userData));
+                }
             } catch (err) {
                 // Demo fallback if backend server is offline
                 localStorage.setItem('user', JSON.stringify(userData));
