@@ -335,8 +335,10 @@ class DigitalTwin:
                 s_node['status'] = 'isolated'
                 s_node['health'] = 0.99
             elif attack_intensity > 0.6 and n_id in ['waf-gateway', 'core-ai-engine']:
-                s_node['health'] = max(0.68, round(s_node['health'] - attack_intensity * 0.3, 3))
-                s_node['status'] = 'degraded' if s_node['health'] >= 0.80 else 'compromised'
+                current_health = float(s_node['health'])
+                new_health = max(0.68, round(current_health - attack_intensity * 0.3, 3))
+                s_node['health'] = new_health
+                s_node['status'] = 'degraded' if new_health >= 0.80 else 'compromised'
             sandbox_nodes[n_id] = s_node
 
         predicted_threat_level = 'CRITICAL' if attack_prob > 0.80 else ('HIGH' if attack_prob > 0.50 else 'LOW')

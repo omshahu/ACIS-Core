@@ -200,8 +200,8 @@ body {
 }
 
 .logo-badge {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     border-radius: var(--radius-md);
     background: var(--accent-light);
     border: 1px solid var(--accent-light);
@@ -211,6 +211,17 @@ body {
     color: var(--accent);
     font-size: 1.15rem;
     flex-shrink: 0;
+    overflow: hidden;
+    padding: 2px;
+}
+
+.logo-badge img,
+.logo-emblem-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    border-radius: inherit;
 }
 
 .logo-text-group {

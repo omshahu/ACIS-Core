@@ -1,4 +1,8 @@
-# ACIS-Core | Autonomous Cyberimmune System
+<div align="center">
+  <img src="assets/acis-logo-white-bg.png" alt="ACIS - Autonomous Cyber Immune System" width="220" />
+  <h1>ACIS-Core</h1>
+  <p><strong>Autonomous Cyberimmune System | AI-Powered • Blockchain-Secured • Privacy-Preserved</strong></p>
+</div>
 
 ACIS-Core is an advanced, autonomous cyberimmune system dashboard and secure authentication gateway for real-time threat monitoring, AI model controls, and trust ledger verification.
 
