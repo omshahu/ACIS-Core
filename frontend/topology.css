@@ -1,21 +1,45 @@
 /* ==========================================================================
    ACIS-Core Digital Twin Topology & Telemetry Stylesheet
    Modern, production-grade cybersecurity dashboard aesthetics
+   Dual Theme (Light & Dark) Aligned Design Tokens
    ========================================================================== */
 
 :root {
-  --topo-bg: #0F172A;
-  --topo-card-bg: #1E293B;
-  --topo-card-hover: #334155;
-  --topo-border: #334155;
-  --topo-border-active: #3B82F6;
-  --topo-text-primary: #F8FAFC;
-  --topo-text-secondary: #94A3B8;
+  --topo-bg: #F8FAFC;
+  --topo-surface: #FFFFFF;
+  --topo-card-bg: #FFFFFF;
+  --topo-card-hover: #F1F5F9;
+  --topo-border: #E2E8F0;
+  --topo-border-active: #059669;
+  --topo-text-primary: #0F172A;
+  --topo-text-secondary: #334155;
   --topo-text-muted: #64748B;
-  --topo-accent: #3B82F6;
-  --topo-accent-glow: rgba(59, 130, 246, 0.25);
+  --topo-accent: #059669;
+  --topo-accent-glow: rgba(5, 150, 105, 0.15);
   
   /* Solid State Health Colors */
+  --health-green: #059669;
+  --health-green-glow: rgba(5, 150, 105, 0.3);
+  --health-yellow: #D97706;
+  --health-yellow-glow: rgba(217, 119, 6, 0.3);
+  --health-red: #DC2626;
+  --health-red-glow: rgba(220, 38, 38, 0.3);
+}
+
+[data-theme="dark"],
+.dark-theme {
+  --topo-bg: #0B0F17;
+  --topo-surface: #111827;
+  --topo-card-bg: #111827;
+  --topo-card-hover: #1F2937;
+  --topo-border: #1F2937;
+  --topo-border-active: #10B981;
+  --topo-text-primary: #F9FAFB;
+  --topo-text-secondary: #E5E7EB;
+  --topo-text-muted: #9CA3AF;
+  --topo-accent: #10B981;
+  --topo-accent-glow: rgba(16, 185, 129, 0.25);
+  
   --health-green: #10B981;
   --health-green-glow: rgba(16, 185, 129, 0.4);
   --health-yellow: #F59E0B;
@@ -26,51 +50,46 @@
 
 /* ==========================================================================
    SOLID STATE HEALTH DOTS (No Spinning Circle Animation)
-   - Green if Health Score > 95%
-   - Yellow if 80-95%
-   - Red if < 80%
    ========================================================================== */
 .health-dot {
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   flex-shrink: 0;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  /* Strictly solid - no spinning animation */
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
   animation: none !important;
 }
 
 .health-dot.green {
   background-color: var(--health-green);
-  box-shadow: 0 0 8px var(--health-green-glow);
+  box-shadow: 0 0 6px var(--health-green-glow);
 }
 
 .health-dot.yellow {
   background-color: var(--health-yellow);
-  box-shadow: 0 0 8px var(--health-yellow-glow);
+  box-shadow: 0 0 6px var(--health-yellow-glow);
 }
 
 .health-dot.red {
   background-color: var(--health-red);
-  box-shadow: 0 0 8px var(--health-red-glow);
+  box-shadow: 0 0 6px var(--health-red-glow);
 }
 
-/* Large variant for node badge headers */
 .health-dot.large {
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
 }
 
 /* Topology Container */
 .topology-container {
-  background: var(--topo-bg);
+  background: var(--topo-surface);
   border: 1px solid var(--topo-border);
   border-radius: 12px;
   padding: 20px;
   color: var(--topo-text-primary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   position: relative;
   overflow: hidden;
 }
@@ -79,13 +98,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--topo-border);
 }
 
 .topology-title {
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--topo-text-primary);
   display: flex;
@@ -97,13 +116,13 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 10px;
+  padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 600;
-  background: rgba(59, 130, 246, 0.12);
-  color: #60A5FA;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--topo-accent);
+  border: 1px solid rgba(37, 99, 235, 0.25);
 }
 
 /* Canvas / Interactive Graph Wrapper */
@@ -111,9 +130,9 @@
   position: relative;
   width: 100%;
   height: 360px;
-  background: radial-gradient(circle at center, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%);
+  background: #0B0F17;
   border-radius: 8px;
-  border: 1px solid rgba(51, 65, 85, 0.6);
+  border: 1px solid var(--topo-border);
   overflow: hidden;
 }
 
@@ -123,7 +142,7 @@
   display: block;
 }
 
-/* Overlay Node Badges (for DOM-based topology views) */
+/* Nodes Grid */
 .nodes-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -137,23 +156,22 @@
   border-radius: 8px;
   padding: 14px;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.18s ease-in-out;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .node-card:hover {
   background: var(--topo-card-hover);
   border-color: var(--topo-border-active);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px var(--topo-accent-glow);
+  transform: translateY(-1px);
 }
 
 .node-card.selected {
   border-color: var(--topo-accent);
-  background: rgba(59, 130, 246, 0.1);
-  box-shadow: 0 0 0 2px var(--topo-accent);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
 .node-card-header {
@@ -164,13 +182,13 @@
 
 .node-name {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--topo-text-primary);
 }
 
 .node-id {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--topo-text-muted);
 }
 
@@ -178,7 +196,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--topo-text-secondary);
 }
 
@@ -194,7 +212,7 @@
 /* Metrics Cards Container */
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 14px;
   margin-bottom: 20px;
 }
@@ -203,23 +221,25 @@
   background: var(--topo-card-bg);
   border: 1px solid var(--topo-border);
   border-radius: 10px;
-  padding: 16px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  transition: transform 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .metric-card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .metric-label {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--topo-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--topo-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
 }
 
 .metric-value-wrapper {
@@ -229,14 +249,14 @@
 }
 
 .metric-value {
-  font-size: 1.75rem;
+  font-size: 1.7rem;
   font-weight: 700;
   font-family: 'JetBrains Mono', monospace;
   color: var(--topo-text-primary);
 }
 
 .metric-subtext {
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   color: var(--topo-text-muted);
 }
 
@@ -253,11 +273,11 @@
   border: 1px solid var(--topo-border);
   border-radius: 6px;
   padding: 8px 14px;
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 500;
   outline: none;
   cursor: pointer;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.16s ease;
 }
 
 .scenario-select:focus {
@@ -265,6 +285,6 @@
 }
 
 .scenario-select option {
-  background: #1E293B;
-  color: #F8FAFC;
+  background: var(--topo-surface);
+  color: var(--topo-text-primary);
 }

@@ -1,161 +1,155 @@
 /**
  * ACIS-Core — useTelemetry Hook
- * Real-time SSE consumer with Lodash throttle (2000ms) to eliminate UI flickering.
+ * Production-ready React hook for continuous live streaming with:
+ * - Status state machine: 'connected' | 'connecting' | 'disconnected' | 'max-retries'
+ * - Auto-reconnect with exponential backoff via TelemetryService
+ * - Page Visibility API handling for seamless background/foreground tab switching
+ * - 2000ms UI throttling to eliminate render flickering
+ * - Manual reconnect/retry trigger
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-
-// Attempt to import throttle from lodash; fallback to native throttle if lodash isn't installed
-let lodashThrottle;
-try {
-  lodashThrottle = require('lodash/throttle');
-} catch (e) {
-  try {
-    const _ = require('lodash');
-    lodashThrottle = _?.throttle;
-  } catch (err) {
-    // Robust fallback implementation matching lodash throttle signature
-    lodashThrottle = (func, wait = 2000, options = {}) => {
-      let timeout = null;
-      let previous = 0;
-      return function (...args) {
-        const now = Date.now();
-        if (!previous && options.leading === false) previous = now;
-        const remaining = wait - (now - previous);
-        if (remaining <= 0 || remaining > wait) {
-          if (timeout) {
-            clearTimeout(timeout);
-            timeout = null;
-          }
-          previous = now;
-          func.apply(this, args);
-        } else if (!timeout && options.trailing !== false) {
-          timeout = setTimeout(() => {
-            previous = options.leading === false ? 0 : Date.now();
-            timeout = null;
-            func.apply(this, args);
-          }, remaining);
-        }
-      };
-    };
-  }
-}
+import { TelemetryService } from './TelemetryService';
 
 const DEFAULT_API_BASE = typeof window !== 'undefined' && window.location.port === '5001'
   ? '/api'
   : 'http://127.0.0.1:5001/api';
 
-export function useTelemetry(apiBase = DEFAULT_API_BASE, throttleInterval = 2000) {
+const DEFAULT_NODES = {
+  'core-ai-engine': { id: 'core-ai-engine', name: 'ACIS AI Core', type: 'ai_core', status: 'operational', health: 0.98 },
+  'waf-gateway': { id: 'waf-gateway', name: 'WAF Gateway', type: 'gateway', status: 'operational', health: 0.97 },
+  'trust-ledger-db': { id: 'trust-ledger-db', name: 'Trust Ledger DB', type: 'database', status: 'operational', health: 0.99 },
+  'telemetry-broker': { id: 'telemetry-broker', name: 'Telemetry Broker', type: 'broker', status: 'operational', health: 0.96 },
+  'sandbox-env': { id: 'sandbox-env', name: 'Sandbox Env', type: 'sandbox', status: 'operational', health: 0.98 }
+};
+
+const DEFAULT_METRICS = {
+  accuracy: 97.4,
+  precision: 95.1,
+  recall: 96.8,
+  f1_score: 95.9,
+  threats_blocked: 142,
+  total_decisions: 150,
+  network_health: 0.974,
+  threat_level: 'LOW',
+  cpu_usage: 28.5,
+  memory_usage: 42.0,
+  risk_score: 12
+};
+
+export function useTelemetry(apiBase = DEFAULT_API_BASE, options = {}) {
   const [telemetry, setTelemetry] = useState(null);
-  const [nodes, setNodes] = useState({
-    'core-ai-engine': { id: 'core-ai-engine', name: 'ACIS AI Core', type: 'ai_core', status: 'operational', health: 0.98 },
-    'waf-gateway': { id: 'waf-gateway', name: 'WAF Gateway', type: 'gateway', status: 'operational', health: 0.97 },
-    'trust-ledger-db': { id: 'trust-ledger-db', name: 'Trust Ledger DB', type: 'database', status: 'operational', health: 0.99 },
-    'telemetry-broker': { id: 'telemetry-broker', name: 'Telemetry Broker', type: 'broker', status: 'operational', health: 0.96 },
-    'sandbox-env': { id: 'sandbox-env', name: 'Sandbox Env', type: 'sandbox', status: 'operational', health: 0.98 }
-  });
-  const [metrics, setMetrics] = useState({
-    accuracy: 97.4,
-    precision: 95.1,
-    recall: 96.8,
-    f1_score: 95.9,
-    threats_blocked: 142,
-    total_decisions: 150,
-    network_health: 0.974,
-    threat_level: 'LOW',
-    cpu_usage: 28.5,
-    memory_usage: 42.0,
-    risk_score: 12
-  });
-  const [connectionStatus, setConnectionStatus] = useState('connecting');
+  const [nodes, setNodes] = useState(DEFAULT_NODES);
+  const [metrics, setMetrics] = useState(DEFAULT_METRICS);
+  
+  // Connection status: 'connected' | 'connecting' | 'disconnected' | 'max-retries'
+  const [status, setStatus] = useState('connecting');
+  const [retryCount, setRetryCount] = useState(0);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
 
-  const eventSourceRef = useRef(null);
+  const serviceRef = useRef(null);
+  const lastUpdateTimestampRef = useRef(0);
 
-  // Throttled state update handler to strictly limit re-render frequency to 2000ms
-  const throttledUpdate = useRef(
-    lodashThrottle((data) => {
-      if (!data) return;
-      setTelemetry(data);
-      if (data.nodes) setNodes(data.nodes);
-      if (data.metrics) setMetrics(data.metrics);
-      setLastUpdated(new Date().toLocaleTimeString());
-    }, throttleInterval, { leading: true, trailing: true })
-  ).current;
-
-  // Fallback Polling if EventSource is unsupported or blocked
-  const fallbackPoll = useCallback(async () => {
-    try {
-      const res = await fetch(`${apiBase}/twin/state`);
-      const json = await res.json();
-      if (json.success && json.twin_state) {
-        throttledUpdate(json.twin_state);
-        setConnectionStatus('polling');
-      }
-    } catch (err) {
-      setConnectionStatus('disconnected');
-      setError(err.message);
-    }
-  }, [apiBase, throttledUpdate]);
-
+  // Initialize service instance
   useEffect(() => {
-    let sseUrl = `${apiBase}/twin/stream`;
-    let isMounted = true;
+    const service = new TelemetryService({
+      apiBase,
+      endpoint: options.endpoint || `${apiBase}/telemetry/stream`,
+      initialDelay: options.initialDelay || 1000,
+      maxDelay: options.maxDelay || 30000,
+      maxRetries: options.maxRetries || 10,
+      watchdogTimeout: options.watchdogTimeout || 10000
+    });
 
-    try {
-      const es = new EventSource(sseUrl);
-      eventSourceRef.current = es;
+    serviceRef.current = service;
 
-      es.onopen = () => {
-        if (!isMounted) return;
-        setConnectionStatus('connected');
+    // Handle incoming telemetry stream packets
+    const unsubData = service.subscribe((data) => {
+      if (!data) return;
+
+      const now = Date.now();
+      // Throttle state update to at most once per 1.5s to prevent unnecessary renders
+      if (now - lastUpdateTimestampRef.current >= 1500) {
+        lastUpdateTimestampRef.current = now;
+
+        setTelemetry(data);
+        if (data.nodes) setNodes(data.nodes);
+        if (data.metrics) setMetrics((prev) => ({ ...prev, ...data.metrics }));
+        setLastUpdated(new Date().toLocaleTimeString());
+      }
+    });
+
+    // Handle connection status transitions
+    const unsubStatus = service.onStatusChange((newStatus, meta) => {
+      setStatus(newStatus);
+      if (meta && typeof meta.retries === 'number') {
+        setRetryCount(meta.retries);
+      }
+      if (newStatus === 'connected') {
         setError(null);
-      };
+      }
+    });
 
-      es.onmessage = (event) => {
-        if (!isMounted) return;
-        try {
-          const parsed = JSON.parse(event.data);
-          throttledUpdate(parsed);
-        } catch (e) {
-          console.warn('[useTelemetry] SSE JSON parse error:', e);
-        }
-      };
+    // Handle stream errors
+    const unsubError = service.onError((err) => {
+      setError(err?.message || 'SSE connection error');
+    });
 
-      es.onerror = () => {
-        if (!isMounted) return;
-        setConnectionStatus('reconnecting');
-        // Trigger fallback poll while reconnecting
-        fallbackPoll();
-      };
-    } catch (err) {
-      console.warn('[useTelemetry] EventSource connection failed, starting fallback polling:', err);
-      setConnectionStatus('polling');
-      const pollTimer = setInterval(fallbackPoll, throttleInterval);
-      return () => clearInterval(pollTimer);
-    }
+    // Connect immediately
+    service.connect();
 
     return () => {
-      isMounted = false;
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-        eventSourceRef.current = null;
-      }
-      if (throttledUpdate && throttledUpdate.cancel) {
-        throttledUpdate.cancel();
+      unsubData();
+      unsubStatus();
+      unsubError();
+      service.destroy();
+      serviceRef.current = null;
+    };
+  }, [apiBase, options.endpoint, options.initialDelay, options.maxDelay, options.maxRetries, options.watchdogTimeout]);
+
+  // Page Visibility API Hook Listener
+  // Ensures tab foregrounding immediately verifies stream health
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && serviceRef.current) {
+        if (status !== 'connected') {
+          console.log('[useTelemetry] Visibility active. Triggering reconnect...');
+          serviceRef.current.reconnect(true);
+        }
       }
     };
-  }, [apiBase, throttleInterval, throttledUpdate, fallbackPoll]);
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [status]);
+
+  // Reconnect action
+  const reconnect = useCallback(() => {
+    if (serviceRef.current) {
+      serviceRef.current.reconnect(true);
+    }
+  }, []);
+
+  // Disconnect action
+  const disconnect = useCallback(() => {
+    if (serviceRef.current) {
+      serviceRef.current.disconnect();
+    }
+  }, []);
 
   return {
     telemetry,
     nodes,
     metrics,
-    connectionStatus,
+    status,
+    connectionStatus: status, // Backward-compatibility alias
+    retryCount,
     lastUpdated,
     error,
-    refresh: fallbackPoll
+    reconnect,
+    disconnect,
+    refresh: reconnect
   };
 }
 

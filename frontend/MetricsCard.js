@@ -94,23 +94,24 @@ export function MetricsCard({ metrics = {}, threatsBlocked, totalDecisions }) {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          background: 'rgba(30, 41, 59, 0.7)',
-          border: '1px solid #334155',
+          background: 'var(--topo-card-bg)',
+          border: '1px solid var(--topo-border)',
           borderRadius: '8px',
-          padding: '10px 16px',
-          marginBottom: '14px',
-          fontSize: '0.85rem'
+          padding: '12px 18px',
+          marginBottom: '16px',
+          fontSize: '0.85rem',
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ color: '#94A3B8' }}>Mitigation Efficacy:</span>
-          <strong style={{ color: '#F8FAFC', fontFamily: 'monospace' }}>
+          <span style={{ color: 'var(--topo-text-muted)', fontWeight: 500 }}>Mitigation Efficacy:</span>
+          <strong style={{ color: 'var(--topo-text-primary)', fontFamily: "'JetBrains Mono', monospace" }}>
             {blocked} Threats Blocked / {decisions} Total Decisions ({computedMetrics.ratioPct}%)
           </strong>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span className="health-dot green" />
-          <span style={{ color: '#10B981', fontSize: '0.75rem', fontWeight: 600 }}>
+          <span style={{ color: 'var(--health-green)', fontSize: '0.75rem', fontWeight: 600 }}>
             Dynamic Metric Engine Active
           </span>
         </div>
