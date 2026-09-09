@@ -1,262 +1,173 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACIS-Core | Operator Authentication</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-
-        body {
-            background-color: #F1F5F9;
-            color: #0F172A;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        /* Main Login Card matching exact screenshot */
-        .login-card {
-            width: 760px;
-            max-width: 92%;
-            min-height: 440px;
-            background-color: #FFFFFF;
-            border-radius: 12px;
-            border: 1px solid #E2E8F0;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-            display: flex;
-            overflow: hidden;
-        }
-
-        /* Left Side Panel */
-        .card-left {
-            flex: 1;
-            background-color: #F8FAFC;
-            padding: 40px 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            border-right: 1px solid #E2E8F0;
-            text-align: center;
-        }
-
-        .brand-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #475569;
-            letter-spacing: -0.5px;
-            margin-top: 6px;
-        }
-
-        .shield-container {
-            margin: 20px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .top-secret-btn {
-            background-color: #DC2626;
-            color: #FFFFFF;
-            font-weight: 700;
-            font-size: 0.75rem;
-            letter-spacing: 1.5px;
-            padding: 8px 22px;
-            border-radius: 6px;
-            text-transform: uppercase;
-            border: none;
-            cursor: default;
-        }
-
-        /* Right Side Form */
-        .card-right {
-            flex: 1.2;
-            padding: 40px 36px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .form-title {
-            font-size: 1.35rem;
-            font-weight: 600;
-            color: #0F172A;
-            margin-bottom: 24px;
-        }
-
-        .input-group {
-            margin-bottom: 18px;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #475569;
-            margin-bottom: 6px;
-        }
-
-        .input-group input,
-        .input-group select {
-            width: 100%;
-            padding: 11px 14px;
-            background-color: #F1F5F9;
-            border: 1px solid #E2E8F0;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            color: #0F172A;
-            outline: none;
-            transition: border-color 0.15s;
-        }
-
-        .input-group select {
-            background-color: #FFFFFF;
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748B%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            background-size: 10px;
-            padding-right: 32px;
-        }
-
-        .input-group input:focus,
-        .input-group select:focus {
-            border-color: #5A6A80;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 12px;
-            background-color: #5A6A80;
-            border: none;
-            border-radius: 6px;
-            color: #FFFFFF;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.15s;
-            margin-top: 8px;
-        }
-
-        .btn-submit:hover {
-            background-color: #475569;
-        }
-
-        .forgot-link-wrapper {
-            text-align: right;
-            margin-top: 14px;
-        }
-
-        .forgot-link {
-            color: #64748B;
-            font-size: 0.8rem;
-            text-decoration: none;
-            transition: color 0.15s;
-        }
-
-        .forgot-link:hover {
-            color: #0F172A;
-            text-decoration: underline;
-        }
-
-        @media (max-width: 680px) {
-            .login-card {
-                flex-direction: column;
-                min-height: auto;
-            }
-
-            .card-left,
-            .card-right {
-                padding: 24px;
-            }
-        }
-    </style>
+    <title>ACIS-Core | Operator Authentication Gateway</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/login.css">
 </head>
 
 <body>
 
-    <!-- Main Card matching screenshot -->
-    <div class="login-card">
-        <!-- Left Brand Panel -->
-        <div class="card-left">
-            <h1 class="brand-title">ACIS-Core</h1>
+    <!-- Top Theme Switcher -->
+    <div class="top-nav-bar">
+        <button type="button" class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Light/Dark Theme">
+            <i class="fas fa-moon" id="themeIcon"></i>
+            <span id="themeLabel">Dark</span>
+        </button>
+    </div>
 
-            <div class="shield-container">
-                <svg width="84" height="100" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2L3 6V13C3 18.52 6.84 23.74 12 25C17.16 23.74 21 18.52 21 13V6L12 2Z" stroke="#5A6A80"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-                    <path d="M12 2V25C17.16 23.74 21 18.52 21 13V6L12 2Z" fill="#5A6A80" fill-opacity="0.2" />
-                    <path d="M12 2L3 6V13C3 18.52 6.84 23.74 12 25C17.16 23.74 21 18.52 21 13V6L12 2Z" 
-                          stroke="#5A6A80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                    <path d="M12 2V25C17.16 23.74 21 18.52 21 13V6L12 2Z" fill="#5A6A80" fill-opacity="0.2"/>
-                </svg>
+    <!-- Main Authentication Gateway Card -->
+    <div class="login-card">
+        <!-- Left Brand & Clearance Panel -->
+        <aside class="card-left">
+            <div>
+                <div class="brand-header">
+                    <div class="brand-logo-wrap">
+                        <i class="fas fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <h1 class="brand-title">ACIS-Core</h1>
+                        <span class="brand-subtitle">Cyberimmune Defense</span>
+                    </div>
+                </div>
+
+                <div class="shield-container">
+                    <svg class="shield-icon-svg" width="92" height="106" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Shield Background with subtle gradient -->
+                        <path d="M12 2L3 6V13C3 18.52 6.84 23.74 12 25C17.16 23.74 21 18.52 21 13V6L12 2Z" 
+                              fill="currentColor" fill-opacity="0.08" stroke="#059669" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+                        <!-- Core Security Ring -->
+                        <circle cx="12" cy="13.5" r="4.5" stroke="#10B981" stroke-width="1.5" stroke-dasharray="2 2" />
+                        <!-- Central Key Node -->
+                        <path d="M12 11V15M10.5 13.5H13.5" stroke="#34D399" stroke-width="1.75" stroke-linecap="round" />
+                    </svg>
+
+                    <div class="gateway-badge-group">
+                        <div class="classification-badge">
+                            <span class="dot"></span>
+                            <span>Level 5 Clearance</span>
+                        </div>
+                        <div class="gateway-status">
+                            <span class="status-dot"></span>
+                            <span>Gateway Status: Operational</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <button class="top-secret-btn" type="button">TOP SECRET</button>
-        </div>
+            <div class="left-footer">
+                <div>Autonomous Cyberimmune Intelligence Platform</div>
+                <div style="color:var(--login-text-muted); font-size:0.68rem; margin-top:3px;">SOC Telemetry & Cryptographic Audit Grid</div>
+            </div>
+        </aside>
 
-        <!-- Right Form Panel -->
-        <div class="card-right">
-            <h2 class="form-title">Operator Authentication</h2>
+        <!-- Right Authentication Form Panel -->
+        <main class="card-right">
+            <div class="form-header-wrap">
+                <h2 class="form-title">Operator Authentication</h2>
+                <p class="form-subtitle">Enter verified credentials to access the cyberimmune control center.</p>
+            </div>
 
-            <form id="loginForm">
+            <form id="loginForm" autocomplete="off">
                 <div class="input-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" required placeholder="">
+                    <label for="username">Operator Email / Identity</label>
+                    <div class="input-field-wrap">
+                        <i class="fas fa-user-shield"></i>
+                        <input type="text" id="username" required placeholder="admin@cyberimmune.ai" value="admin@cyberimmune.ai">
+                    </div>
                 </div>
 
                 <div class="input-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" required placeholder="">
+                    <label for="password">Security Password</label>
+                    <div class="input-field-wrap">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" required placeholder="••••••••••••" value="SecurePass123">
+                    </div>
                 </div>
 
                 <div class="input-group">
-                    <label for="role">Role clearance</label>
-                    <select id="role">
-                        <option value="" selected>Select</option>
-                        <option value="SecOps Administrator (Level 5)">SecOps Administrator (Level 5)</option>
-                        <option value="Cyber Analyst (Level 4)">Cyber Analyst (Level 4)</option>
-                        <option value="Security Engineer (Level 3)">Security Engineer (Level 3)</option>
-                        <option value="Observer (Level 2)">Observer (Level 2)</option>
-                    </select>
+                    <label for="role">Clearance Authority</label>
+                    <div class="input-field-wrap">
+                        <i class="fas fa-id-badge"></i>
+                        <select id="role">
+                            <option value="SecOps Administrator (Level 5)" selected>SecOps Administrator (Level 5)</option>
+                            <option value="Cyber Analyst (Level 4)">Cyber Analyst (Level 4)</option>
+                            <option value="Security Engineer (Level 3)">Security Engineer (Level 3)</option>
+                            <option value="Observer (Level 2)">Observer (Level 2)</option>
+                        </select>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn-submit" id="loginBtn">Authenticate</button>
+                <button type="submit" class="btn-submit" id="loginBtn">
+                    <i class="fas fa-key"></i>
+                    <span>Authenticate Operator</span>
+                </button>
             </form>
 
-            <div class="forgot-link-wrapper">
+            <div class="form-footer-actions">
+                <button type="button" class="quick-demo-btn" onclick="quickDemoLogin()" title="Instant access using pre-configured SecOps credentials">
+                    <i class="fas fa-bolt"></i>
+                    <span>Quick Demo Login</span>
+                </button>
+
                 <a href="#" class="forgot-link" onclick="quickDemoLogin(); return false;">Forgot Password?</a>
             </div>
-        </div>
+        </main>
     </div>
 
     <script>
+        // ── Theme State Management ──
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('acis-theme', theme);
+            const icon = document.getElementById('themeIcon');
+            const label = document.getElementById('themeLabel');
+            if (icon && label) {
+                if (theme === 'dark') {
+                    icon.className = 'fas fa-moon';
+                    label.textContent = 'Dark';
+                } else {
+                    icon.className = 'fas fa-sun';
+                    label.textContent = 'Light';
+                }
+            }
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            applyTheme(next);
+        }
+
+        // Initialize Theme from localStorage
+        const savedTheme = localStorage.getItem('acis-theme') || 'dark';
+        applyTheme(savedTheme);
+
+        // ── Authentication Form Submission ──
         document.getElementById('loginForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const btn = document.getElementById('loginBtn');
-            btn.textContent = 'Authenticating...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Authenticating...</span>';
             btn.disabled = true;
 
+            const usernameInput = document.getElementById('username').value.trim() || 'admin';
+            const roleInput = document.getElementById('role').value || 'SecOps Administrator (Level 5)';
+
             const userData = {
-                user: document.getElementById('username').value || 'admin',
-                email: document.getElementById('username').value || 'admin@cyberimmune.ai',
-                role: document.getElementById('role').value || 'SecOps Administrator'
+                user: usernameInput.includes('@') ? usernameInput.split('@')[0] : usernameInput,
+                email: usernameInput.includes('@') ? usernameInput : `${usernameInput}@cyberimmune.ai`,
+                role: roleInput
             };
 
             try {
                 if (window.location.protocol === 'https:') {
-                    // Hosted environment (e.g. GitHub Pages) - instant demo login
+                    // Hosted environment (e.g. GitHub Pages) - instant static demo login
                     localStorage.setItem('user', JSON.stringify(userData));
                 } else {
                     const controller = new AbortController();
@@ -272,7 +183,7 @@
                     localStorage.setItem('user', JSON.stringify(data.success ? data : userData));
                 }
             } catch (err) {
-                // Demo fallback if backend server is offline
+                // Seamless demo fallback if backend server is offline
                 localStorage.setItem('user', JSON.stringify(userData));
             }
 
@@ -282,7 +193,12 @@
         });
 
         function quickDemoLogin() {
-            localStorage.setItem('user', JSON.stringify({ user: 'admin', role: 'SecOps Administrator' }));
+            const defaultUser = {
+                user: 'admin',
+                email: 'admin@cyberimmune.ai',
+                role: 'SecOps Administrator (Level 5)'
+            };
+            localStorage.setItem('user', JSON.stringify(defaultUser));
             window.location.href = 'index.html';
         }
     </script>

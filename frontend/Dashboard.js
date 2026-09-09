@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { useTelemetry } from './useTelemetry';
+import { StatusBadge } from './StatusBadge';
 import { Topology } from './Topology';
 import { MetricsCard } from './MetricsCard';
 import { ScenarioSelector } from './ScenarioSelector';
@@ -18,7 +19,7 @@ const DEFAULT_API_BASE = typeof window !== 'undefined' && window.location.port =
   : 'http://127.0.0.1:5001/api';
 
 export function Dashboard({ apiBase = DEFAULT_API_BASE }) {
-  const { telemetry, nodes, metrics, connectionStatus, lastUpdated } = useTelemetry();
+  const { telemetry, nodes, metrics, status, retryCount, reconnect, lastUpdated } = useTelemetry(apiBase);
   const [selectedNode, setSelectedNode] = useState('core-ai-engine');
   
   // Requirement 3: Simulation dropdown strictly defaults to "normal"
@@ -111,23 +112,14 @@ export function Dashboard({ apiBase = DEFAULT_API_BASE }) {
           </p>
         </div>
 
-        {/* Connection Status Badge */}
+        {/* Production 24/7 Live Stream Status Badge with Reconnect Button */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div className="topology-stream-badge">
-            <span
-              className={`health-dot ${
-                connectionStatus === 'connected' ? 'green' : connectionStatus === 'polling' ? 'yellow' : 'red'
-              }`}
-            />
-            <span style={{ textTransform: 'capitalize' }}>
-              {connectionStatus === 'connected' ? 'SSE Live Stream (2000ms)' : connectionStatus}
-            </span>
-          </div>
-          {lastUpdated && (
-            <span style={{ fontSize: '0.75rem', color: '#64748B' }}>
-              Updated: {lastUpdated}
-            </span>
-          )}
+          <StatusBadge
+            status={status}
+            onReconnect={reconnect}
+            lastUpdated={lastUpdated}
+            retryCount={retryCount}
+          />
         </div>
       </div>
 

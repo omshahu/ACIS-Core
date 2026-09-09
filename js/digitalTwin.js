@@ -32,6 +32,17 @@ class DigitalTwinUI {
             ['core-ai-engine', 'sandbox-env'],
             ['waf-gateway', 'core-ai-engine']
         ];
+
+        // Production auto-reconnect with exponential backoff
+        this.retries = 0;
+        this.maxRetries = 10;
+        this.reconnectTimer = null;
+        this.initialDelay = 1000;
+        this.maxDelay = 30000;
+        this.backoffMultiplier = 1.5;
+
+        // Page Visibility API & Network Connectivity auto-resume
+        this.initLifecycleEvents();
     }
 
     init() {
@@ -51,7 +62,7 @@ class DigitalTwinUI {
 
     resizeCanvas() {
         if (!this.canvas) return;
-        const rect = this.canvas.parentElement.getBoundingClientRect();
+        const rect = this.canvas.parentElement ? this.canvas.parentElement.getBoundingClientRect() : { width: 600, height: 300 };
         this.canvas.width = rect.width || 600;
         this.canvas.height = 300;
     }
@@ -69,20 +80,81 @@ class DigitalTwinUI {
         }
     }
 
-    // ---------- REAL-TIME SSE STREAMING ----------
+    initLifecycleEvents() {
+        // Reconnect immediately when tab becomes visible or mobile device is unlocked
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                if (!this.sseSource || this.sseSource.readyState === EventSource.CLOSED) {
+                    console.log('[DigitalTwinUI] Page Visibility active: Reconnecting live telemetry stream...');
+                    this.retries = 0;
+                    this.connectSSE();
+                }
+            }
+        });
+
+        window.addEventListener('online', () => {
+            console.log('[DigitalTwinUI] Network online detected. Reconnecting...');
+            this.retries = 0;
+            this.connectSSE();
+        });
+
+        window.addEventListener('offline', () => {
+            console.warn('[DigitalTwinUI] Network offline.');
+            this.updateGlobalBadge('disconnected');
+        });
+    }
+
+    updateGlobalBadge(status) {
+        const badge = document.querySelector('.status-badge');
+        const statusText = document.getElementById('status');
+        if (!badge || !statusText) return;
+
+        badge.classList.remove('connected', 'connecting', 'disconnected', 'max-retries');
+        badge.classList.add(status);
+
+        if (status === 'connected') {
+            statusText.innerHTML = 'Connected (2s)';
+        } else if (status === 'connecting') {
+            statusText.innerHTML = this.retries > 0 ? `Connecting (${this.retries})...` : 'Connecting...';
+        } else if (status === 'disconnected') {
+            statusText.innerHTML = `Disconnected <button class="status-reconnect-btn" onclick="window.twinUI && window.twinUI.reconnectManually()">↻ Reconnect</button>`;
+        } else if (status === 'max-retries') {
+            statusText.innerHTML = `⚠️ Stream Offline <button class="status-reconnect-btn" onclick="window.twinUI && window.twinUI.reconnectManually()">↻ Retry Now</button>`;
+        }
+    }
+
+    reconnectManually() {
+        console.log('[DigitalTwinUI] Manual reconnect triggered by user');
+        this.retries = 0;
+        this.connectSSE();
+    }
+
+    // ---------- REAL-TIME SSE STREAMING (24/7 AUTO-RECONNECT) ----------
     connectSSE() {
+        if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = null;
+        }
+
         if (this.sseSource) {
             this.sseSource.close();
+            this.sseSource = null;
         }
 
         const statusEl = document.getElementById('twinStreamStatus');
         if (statusEl) statusEl.innerHTML = '<span class="status-dot running"></span> Connecting SSE...';
+        this.updateGlobalBadge('connecting');
 
         try {
-            this.sseSource = new EventSource(`${this.apiBase}/twin/stream`);
+            // Target the 2s /api/telemetry/stream endpoint with fallback to /twin/stream
+            const streamUrl = `${this.apiBase}/telemetry/stream`;
+            this.sseSource = new EventSource(streamUrl);
 
             this.sseSource.onopen = () => {
-                if (statusEl) statusEl.innerHTML = '<span class="status-dot success"></span> Live SSE Streaming';
+                console.log('[DigitalTwinUI] SSE live stream connected successfully');
+                this.retries = 0;
+                if (statusEl) statusEl.innerHTML = '<span class="status-dot success"></span> Live SSE Streaming (2s)';
+                this.updateGlobalBadge('connected');
             };
 
             this.sseSource.onmessage = (event) => {
@@ -90,14 +162,39 @@ class DigitalTwinUI {
                 try {
                     const data = JSON.parse(event.data);
                     this.updateState(data);
+                    this.updateGlobalBadge('connected');
                 } catch (e) {
                     console.error('SSE parse error', e);
                 }
             };
 
             this.sseSource.onerror = () => {
-                if (statusEl) statusEl.innerHTML = '<span class="status-dot warning"></span> SSE Reconnecting (Polling active)';
+                if (this.sseSource) {
+                    this.sseSource.close();
+                    this.sseSource = null;
+                }
+
+                this.retries += 1;
+                if (this.retries > this.maxRetries) {
+                    console.warn(`[DigitalTwinUI] Max retries (${this.maxRetries}) reached.`);
+                    if (statusEl) statusEl.innerHTML = '<span class="status-dot danger"></span> Max Retries Reached';
+                    this.updateGlobalBadge('max-retries');
+                    return;
+                }
+
+                // Exponential backoff calculation
+                const backoff = this.initialDelay * Math.pow(this.backoffMultiplier, this.retries - 1);
+                const jitter = Math.floor(Math.random() * 500);
+                const delay = Math.min(this.maxDelay, Math.floor(backoff + jitter));
+
+                if (statusEl) statusEl.innerHTML = `<span class="status-dot warning"></span> Reconnecting in ${Math.round(delay / 1000)}s...`;
+                this.updateGlobalBadge('connecting');
+
                 this.fallbackPolling();
+
+                this.reconnectTimer = setTimeout(() => {
+                    this.connectSSE();
+                }, delay);
             };
         } catch (e) {
             this.fallbackPolling();
@@ -224,8 +321,8 @@ class DigitalTwinUI {
             }
 
             // Node Outer Disk (Clean solid style, no spinning animation)
-            ctx.fillStyle = isSelected ? 'rgba(59, 130, 246, 0.25)' : 'rgba(30, 41, 59, 0.9)';
-            ctx.strokeStyle = isSelected ? '#3B82F6' : '#475569';
+            ctx.fillStyle = isSelected ? 'rgba(16, 185, 129, 0.25)' : 'rgba(30, 41, 59, 0.9)';
+            ctx.strokeStyle = isSelected ? '#10B981' : '#475569';
             ctx.lineWidth = isSelected ? 2.5 : 1.5;
             ctx.beginPath();
             ctx.arc(nx, ny, 20, 0, Math.PI * 2);
@@ -464,3 +561,10 @@ function dictCopy(obj) {
 
 // Global instance
 window.digitalTwinUI = new DigitalTwinUI();
+window.twinUI = window.digitalTwinUI;
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => window.digitalTwinUI.init());
+} else {
+    window.digitalTwinUI.init();
+}
