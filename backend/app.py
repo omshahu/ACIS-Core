@@ -1462,7 +1462,9 @@ if __name__ == '__main__':
     print(f"[STATS] Data loaded: {len(X_train) if X_train is not None else 0:,} rows, {len(feature_names)} features")
     print(f"[STATS] Dataset origin: {dataset_info.get('source')}")
     print("[OK] All models initialized successfully!")
-    print("[RUN] Server running on http://127.0.0.1:5001")
+    port = int(os.environ.get('PORT', 5001))
+    host = '0.0.0.0'
+    print(f"[RUN] Server running on http://{host}:{port}")
     print("[INFO] SOAR Endpoints & SQLite DB connected")
     print("="*50 + "\n")
-    app.run(debug=True, port=5001)
+    app.run(host=host, port=port, debug=False)

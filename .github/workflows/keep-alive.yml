@@ -1,0 +1,18 @@
+name: 24/7 Cloud SOC Keepalive
+
+on:
+  schedule:
+    # Runs every 10 minutes to prevent Render free-tier cold sleep
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping-cloud-soc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping ACIS-Core Render Backend
+        run: |
+          BACKEND_URL="${{ secrets.RENDER_BACKEND_URL || 'https://acis-core-backend.onrender.com' }}"
+          echo "Pinging $BACKEND_URL/api/health to sustain 24/7 uptime..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BACKEND_URL/api/health" || true)
+          echo "Health check HTTP response: $STATUS"

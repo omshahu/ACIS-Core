@@ -5,7 +5,9 @@
 
 class DigitalTwinUI {
     constructor() {
-        this.apiBase = window.location.origin.includes('5001') ? '/api' : 'http://127.0.0.1:5001/api';
+        this.apiBase = (typeof window !== 'undefined' && window.ACIS_CONFIG && window.ACIS_CONFIG.getApiBase)
+            ? window.ACIS_CONFIG.getApiBase()
+            : (window.location.origin.includes('5001') ? '/api' : 'http://127.0.0.1:5001/api');
         this.sseSource = null;
         this.isLive = true;
         this.historyBuffer = [];

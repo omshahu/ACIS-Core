@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -18,10 +18,14 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Centralized Enterprise Stylesheet -->
     <link rel="stylesheet" href="css/style.css">
+    <!-- Unified Configuration Resolver -->
+    <script src="js/config.js"></script>
 </head>
 
 <body>
     <div class="dashboard" id="dashboard">
+        <!-- Mobile Sidebar Backdrop Overlay -->
+        <div class="sidebar-overlay" onclick="closeMobileMenu()"></div>
 
         <!-- SIDEBAR -->
         <aside class="sidebar">
@@ -90,32 +94,59 @@
 
             <!-- TOP EXECUTIVE HEADER -->
             <header>
-                <div class="header-title-wrap">
-                    <h1>
-                        <i class="fas fa-shield-halved shield-icon"></i>
-                        <span>Autonomous Cyberimmune Dashboard</span>
-                    </h1>
-                    <div class="breadcrumb" id="headerBreadcrumb">
-                        SOC Operations / Real-Time Autonomous Threat Mitigation
+                <div class="header-title-wrap" style="display:flex; align-items:center; gap:12px;">
+                    <button type="button" class="mobile-menu-btn" onclick="toggleMobileMenu()" title="Open Navigation">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div>
+                        <h1>
+                            <i class="fas fa-shield-halved shield-icon"></i>
+                            <span>Autonomous Cyberimmune Dashboard</span>
+                        </h1>
+                        <div class="breadcrumb" id="headerBreadcrumb">
+                            SOC Operations / Real-Time Autonomous Threat Mitigation
+                        </div>
                     </div>
                 </div>
 
                 <div class="header-right">
                     <div class="theme-selector-wrap" title="Theme Selector">
-                        <button class="theme-btn active" data-theme="light" onclick="setTheme('light')" title="Light Mode">
+                        <button class="theme-btn" data-theme="light" onclick="setTheme('light')" title="Light Mode">
                             <i class="fas fa-sun"></i> Light
                         </button>
-                        <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')" title="Dark Mode">
+                        <button class="theme-btn active" data-theme="dark" onclick="setTheme('dark')" title="Dark Mode">
                             <i class="fas fa-moon"></i> Dark
                         </button>
                     </div>
 
-                    <div class="status-badge" title="Live Telemetry Heartbeat">
+                    <div class="status-badge" onclick="openEndpointModal()" title="Click to view or adjust cloud backend target" style="cursor:pointer;">
                         <span class="dot"></span>
-                        <span id="status">Connected</span>
+                        <span id="status">Connected (2s)</span>
+                        <i class="fas fa-sliders" style="font-size:0.7rem; opacity:0.6; margin-left:4px;"></i>
                     </div>
                 </div>
             </header>
+
+            <!-- Backend Connection Settings Modal -->
+            <div class="endpoint-modal-backdrop" id="endpointModalBackdrop" onclick="closeEndpointModal(event)">
+                <div class="endpoint-modal" onclick="event.stopPropagation()">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-network-wired" style="color:var(--accent);"></i> SOC Cloud Connection</h3>
+                        <button type="button" class="modal-close-btn" onclick="closeEndpointModal()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="endpointUrlInput">Backend API Target URL:</label>
+                        <input type="text" id="endpointUrlInput" placeholder="https://acis-core-backend.onrender.com/api" spellcheck="false">
+                        <p style="font-size:0.76rem; color:var(--text-muted); line-height:1.4; margin-bottom:14px;">
+                            Auto-resolves Render cloud backend in production and localhost:5001 locally. You can customize the target URL from any device.
+                        </p>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="control-btn" style="padding:7px 14px; font-size:0.8rem;" onclick="resetEndpointDefault()">Reset to Auto</button>
+                        <button type="button" class="control-btn run-all-btn" style="padding:7px 16px; font-size:0.8rem;" onclick="saveEndpointUrl()">Save & Reconnect</button>
+                    </div>
+                </div>
+            </div>
 
             <!-- OVERVIEW TAB -->
             <div id="tab-overview" class="tab-content">
@@ -630,16 +661,85 @@
             localStorage.setItem('acis-theme', theme);
         }
 
-        const savedTheme = localStorage.getItem('acis-theme') || 'light';
+        const savedTheme = localStorage.getItem('acis-theme') || 'dark';
         setTheme(savedTheme);
 
         // ============================================
-        // CONFIG & STATE
+        // CONFIG & STATE RESOLUTION
         // ============================================
-        const API = window.location.origin.includes('5001') ? '/api' : 'http://127.0.0.1:5001/api';
+        let API = (window.ACIS_CONFIG && window.ACIS_CONFIG.getApiBase)
+            ? window.ACIS_CONFIG.getApiBase()
+            : (window.location.origin.includes('5001') ? '/api' : 'http://127.0.0.1:5001/api');
+
         let anomalyChart = null;
         let monitoringInterval = null;
         let pendingInterval = null;
+
+        // ============================================
+        // MOBILE NAVIGATION DRAWER
+        // ============================================
+        function toggleMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (sidebar) sidebar.classList.toggle('mobile-open');
+            if (overlay) overlay.classList.toggle('active');
+        }
+
+        function closeMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (sidebar) sidebar.classList.remove('mobile-open');
+            if (overlay) overlay.classList.remove('active');
+        }
+
+        // ============================================
+        // ENDPOINT CONFIGURATION MODAL
+        // ============================================
+        function openEndpointModal() {
+            const modal = document.getElementById('endpointModalBackdrop');
+            const input = document.getElementById('endpointUrlInput');
+            if (modal) modal.classList.add('active');
+            if (input && window.ACIS_CONFIG) {
+                input.value = window.ACIS_CONFIG.getApiBase();
+            }
+        }
+
+        function closeEndpointModal(e) {
+            if (e && e.target && e.target.id !== 'endpointModalBackdrop') return;
+            const modal = document.getElementById('endpointModalBackdrop');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function saveEndpointUrl() {
+            const input = document.getElementById('endpointUrlInput');
+            if (input && input.value.trim() && window.ACIS_CONFIG) {
+                window.ACIS_CONFIG.setApiBase(input.value.trim());
+                API = window.ACIS_CONFIG.getApiBase();
+                if (window.digitalTwinUI) {
+                    window.digitalTwinUI.apiBase = API;
+                    window.digitalTwinUI.reconnectManually();
+                }
+                checkConnection();
+                const modal = document.getElementById('endpointModalBackdrop');
+                if (modal) modal.classList.remove('active');
+            }
+        }
+
+        function resetEndpointDefault() {
+            if (window.ACIS_CONFIG) {
+                window.ACIS_CONFIG.resetApiBase();
+                API = window.ACIS_CONFIG.getApiBase();
+                const input = document.getElementById('endpointUrlInput');
+                if (input) input.value = API;
+                if (window.digitalTwinUI) {
+                    window.digitalTwinUI.apiBase = API;
+                    window.digitalTwinUI.reconnectManually();
+                }
+                checkConnection();
+                const modal = document.getElementById('endpointModalBackdrop');
+                if (modal) modal.classList.remove('active');
+            }
+        }
 
         // ============================================
         // CHECK & RENDER OPERATOR IDENTITY
@@ -681,6 +781,7 @@
         };
 
         function showTab(tab, element) {
+            closeMobileMenu();
             document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
             const target = document.getElementById('tab-' + tab);
             if (target) target.style.display = 'block';

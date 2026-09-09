@@ -11,9 +11,9 @@
 export class TelemetryService {
   constructor(options = {}) {
     // Resolve default endpoint based on environment
-    const defaultBase = typeof window !== 'undefined' && window.location.port === '5001'
-      ? '/api'
-      : 'http://127.0.0.1:5001/api';
+    const defaultBase = typeof window !== 'undefined' && window.ACIS_CONFIG && window.ACIS_CONFIG.getApiBase
+      ? window.ACIS_CONFIG.getApiBase()
+      : (typeof window !== 'undefined' && window.location.port === '5001' ? '/api' : 'http://127.0.0.1:5001/api');
 
     this.endpoint = options.endpoint || `${options.apiBase || defaultBase}/telemetry/stream`;
     this.initialDelay = options.initialDelay || 1000;        // 1s starting delay

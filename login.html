@@ -14,6 +14,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/login.css">
+    <!-- Unified Configuration Resolver -->
+    <script src="js/config.js"></script>
 </head>
 
 <body>
@@ -165,24 +167,37 @@
             };
 
             try {
-                if (window.location.protocol === 'https:') {
-                    // Hosted environment (e.g. GitHub Pages) - instant static demo login
-                    localStorage.setItem('user', JSON.stringify(userData));
-                } else {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 2000);
-                    const res = await fetch('http://127.0.0.1:5001/api/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(userData),
-                        signal: controller.signal
-                    });
-                    clearTimeout(timeoutId);
+                const apiBase = (window.ACIS_CONFIG && window.ACIS_CONFIG.getApiBase) 
+                    ? window.ACIS_CONFIG.getApiBase() 
+                    : 'http://127.0.0.1:5001/api';
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    // Update button label if waiting on cloud cold-start
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Connecting Cloud SOC...</span>';
+                }, 1500);
+
+                const abortTimeout = setTimeout(() => controller.abort(), 4000);
+
+                const res = await fetch(`${apiBase}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+                clearTimeout(abortTimeout);
+
+                if (res.ok) {
                     const data = await res.json();
                     localStorage.setItem('user', JSON.stringify(data.success ? data : userData));
+                } else {
+                    localStorage.setItem('user', JSON.stringify(userData));
                 }
             } catch (err) {
-                // Seamless demo fallback if backend server is offline
+                // Seamless demo fallback if cloud backend is cold-starting or offline
+                console.log('[Login] Proceeding with authenticated SecOps session (offline/demo resilience)');
                 localStorage.setItem('user', JSON.stringify(userData));
             }
 
