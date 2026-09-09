@@ -34,6 +34,7 @@ jobs:
           cp login.html _site/
           cp -r css _site/
           cp -r js _site/
+          cp -r assets _site/
           cp -r frontend _site/
           cp README.md _site/
 
