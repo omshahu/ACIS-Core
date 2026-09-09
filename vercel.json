@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "acis-core",
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [

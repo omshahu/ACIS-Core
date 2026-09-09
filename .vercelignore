@@ -1,0 +1,9 @@
+backend/
+data.csv
+.git/
+.github/
+.vscode/
+*.csv
+*.py
+*.pyc
+__pycache__/
