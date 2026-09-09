@@ -4,42 +4,42 @@
    ================================================================ */
 
 :root {
-    --login-bg: #0B0F17;
-    --login-card-bg: #111827;
-    --login-panel-bg: #0F1623;
-    --login-border: #1F2937;
-    --login-border-hover: #374151;
-    --login-border-focus: #10B981;
-    --login-text-primary: #F9FAFB;
-    --login-text-secondary: #9CA3AF;
-    --login-text-muted: #6B7280;
-    --login-accent: #10B981;
-    --login-accent-hover: #059669;
-    --login-accent-light: rgba(16, 185, 129, 0.12);
-    --login-input-bg: #161F30;
-    --login-input-border: #263348;
-    --login-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    --login-bg: #080E0B;
+    --login-card-bg: #0F1A14;
+    --login-panel-bg: #0B140F;
+    --login-border: #1E382B;
+    --login-border-hover: #294D3B;
+    --login-border-focus: #00D084;
+    --login-text-primary: #F0FDF4;
+    --login-text-secondary: #A7C5B5;
+    --login-text-muted: #6E8E7E;
+    --login-accent: #00D084;
+    --login-accent-hover: #00B36E;
+    --login-accent-light: rgba(0, 208, 132, 0.14);
+    --login-input-bg: #14241C;
+    --login-input-border: #1E382B;
+    --login-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(0, 208, 132, 0.08);
     --login-radius: 12px;
-    --login-status-ok: #10B981;
+    --login-status-ok: #00D084;
     --login-danger: #EF4444;
 }
 
 [data-theme="light"] {
-    --login-bg: #F1F5F9;
+    --login-bg: #F4F7F5;
     --login-card-bg: #FFFFFF;
-    --login-panel-bg: #F8FAFC;
-    --login-border: #E2E8F0;
-    --login-border-hover: #CBD5E1;
-    --login-border-focus: #059669;
-    --login-text-primary: #0F172A;
-    --login-text-secondary: #475569;
-    --login-text-muted: #64748B;
-    --login-accent: #059669;
-    --login-accent-hover: #047857;
-    --login-accent-light: rgba(5, 150, 105, 0.08);
-    --login-input-bg: #F8FAFC;
-    --login-input-border: #CBD5E1;
-    --login-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+    --login-panel-bg: #EDF3F0;
+    --login-border: #DDE7E1;
+    --login-border-hover: #CBDAD1;
+    --login-border-focus: #006A4E;
+    --login-text-primary: #0A1F16;
+    --login-text-secondary: #2C4035;
+    --login-text-muted: #5C7367;
+    --login-accent: #006A4E;
+    --login-accent-hover: #00523C;
+    --login-accent-light: rgba(0, 106, 78, 0.08);
+    --login-input-bg: #EDF3F0;
+    --login-input-border: #DDE7E1;
+    --login-shadow: 0 20px 40px -15px rgba(10, 31, 22, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 * {

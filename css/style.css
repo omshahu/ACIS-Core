@@ -4,157 +4,157 @@
    ================================================================ */
 
 :root {
-    /* ── Light Theme Design Tokens (Default) ── */
-    --bg-primary: #F8FAFC;
+    /* ── Imperial Green Light Theme ── */
+    --bg-primary: #F4F7F5;
     --bg-secondary: #FFFFFF;
     --bg-card: #FFFFFF;
-    --bg-input: #F1F5F9;
+    --bg-input: #EDF3F0;
     --bg-input-focus: #FFFFFF;
-    --bg-hover: #F1F5F9;
-    --border-color: #E2E8F0;
-    --border-light: #F1F5F9;
-    --border-focus: #059669;
+    --bg-hover: #E7EFEA;
+    --border-color: #DDE7E1;
+    --border-light: #EDF3F0;
+    --border-focus: #006A4E;
     
-    --text-primary: #0F172A;
-    --text-secondary: #334155;
-    --text-muted: #64748B;
-    --text-body: #475569;
+    --text-primary: #0A1F16;
+    --text-secondary: #2C4035;
+    --text-muted: #5C7367;
+    --text-body: #3B5246;
     
-    --accent: #059669;
-    --accent-hover: #047857;
-    --accent-secondary: #7C3AED;
-    --accent-light: rgba(5, 150, 105, 0.08);
-    --accent-glow: rgba(5, 150, 105, 0.2);
+    --accent: #006A4E;
+    --accent-hover: #00523C;
+    --accent-secondary: #00875A;
+    --accent-light: rgba(0, 106, 78, 0.08);
+    --accent-glow: rgba(0, 106, 78, 0.22);
     
-    --success: #059669;
-    --success-bg: rgba(5, 150, 105, 0.1);
-    --success-border: rgba(5, 150, 105, 0.25);
+    --success: #00875A;
+    --success-bg: rgba(0, 135, 90, 0.10);
+    --success-border: rgba(0, 135, 90, 0.25);
     
     --warning: #D97706;
-    --warning-bg: rgba(217, 119, 6, 0.1);
+    --warning-bg: rgba(217, 119, 6, 0.10);
     --warning-border: rgba(217, 119, 6, 0.25);
     
     --danger: #DC2626;
-    --danger-bg: rgba(220, 38, 38, 0.1);
+    --danger-bg: rgba(220, 38, 38, 0.10);
     --danger-border: rgba(220, 38, 38, 0.25);
     
-    --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
-    --card-shadow-hover: 0 4px 12px 0 rgba(5, 150, 105, 0.12);
+    --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+    --card-shadow-hover: 0 4px 14px 0 rgba(0, 106, 78, 0.14);
     
-    --status-connected: #059669;
+    --status-connected: #00875A;
     --status-disconnected: #DC2626;
     
-    --scrollbar-track: #F1F5F9;
-    --scrollbar-thumb: #CBD5E1;
-    --scrollbar-thumb-hover: #94A3B8;
+    --scrollbar-track: #F4F7F5;
+    --scrollbar-thumb: #CBDAD1;
+    --scrollbar-thumb-hover: #9CB5A6;
     
-    --btn-primary: #059669;
-    --btn-primary-hover: #047857;
-    --btn-primary-active: #065F46;
+    --btn-primary: #006A4E;
+    --btn-primary-hover: #00523C;
+    --btn-primary-active: #003D2C;
     
     --sidebar-bg: #FFFFFF;
-    --sidebar-border: #E2E8F0;
-    --sidebar-active-bg: #ECFDF5;
-    --sidebar-active-text: #059669;
+    --sidebar-border: #DDE7E1;
+    --sidebar-active-bg: #E8F5EF;
+    --sidebar-active-text: #006A4E;
     
     --panel-bg: #FFFFFF;
-    --panel-border: #E2E8F0;
+    --panel-border: #DDE7E1;
     
-    --log-bg: #F8FAFC;
-    --log-border: #059669;
-    --terminal-color: #0F172A;
-    --hash-color: #059669;
+    --log-bg: #EDF3F0;
+    --log-border: #006A4E;
+    --terminal-color: #0A1F16;
+    --hash-color: #006A4E;
     
-    --badge-verified-bg: rgba(5, 150, 105, 0.1);
-    --badge-verified-color: #059669;
-    --badge-pending-bg: rgba(217, 119, 6, 0.1);
+    --badge-verified-bg: rgba(0, 106, 78, 0.10);
+    --badge-verified-color: #006A4E;
+    --badge-pending-bg: rgba(217, 119, 6, 0.10);
     --badge-pending-color: #D97706;
     
-    --chart-grid: rgba(0, 0, 0, 0.06);
-    --chart-ticks: #64748B;
+    --chart-grid: rgba(0, 106, 78, 0.06);
+    --chart-ticks: #5C7367;
     
-    --shap-positive: #059669;
+    --shap-positive: #00875A;
     --shap-negative: #DC2626;
-    --shap-highlight: #059669;
+    --shap-highlight: #006A4E;
     
     --radius-sm: 6px;
     --radius-md: 8px;
     --radius-lg: 12px;
 }
 
-/* ── High-Contrast SOC Dark Theme (Default) ── */
+/* ── Imperial Green SOC Dark Theme (Default) ── */
 [data-theme="dark"] {
-    --bg-primary: #0B0F17;
-    --bg-secondary: #111827;
-    --bg-card: #111827;
-    --bg-input: #161F30;
-    --bg-input-focus: #1A263D;
-    --bg-hover: #1F2937;
-    --border-color: #1F2937;
-    --border-light: #182234;
-    --border-focus: #10B981;
+    --bg-primary: #080E0B;
+    --bg-secondary: #0F1A14;
+    --bg-card: #0F1A14;
+    --bg-input: #14241C;
+    --bg-input-focus: #1B3026;
+    --bg-hover: #192D23;
+    --border-color: #1E382B;
+    --border-light: #162B21;
+    --border-focus: #00D084;
     
-    --text-primary: #F9FAFB;
-    --text-secondary: #E5E7EB;
-    --text-muted: #9CA3AF;
-    --text-body: #D1D5DB;
+    --text-primary: #F0FDF4;
+    --text-secondary: #A7C5B5;
+    --text-muted: #6E8E7E;
+    --text-body: #C3DCD0;
     
-    --accent: #10B981;
-    --accent-hover: #059669;
-    --accent-secondary: #7C3AED;
-    --accent-light: rgba(16, 185, 129, 0.15);
-    --accent-glow: rgba(16, 185, 129, 0.3);
+    --accent: #00D084;
+    --accent-hover: #00B36E;
+    --accent-secondary: #10B981;
+    --accent-light: rgba(0, 208, 132, 0.14);
+    --accent-glow: rgba(0, 208, 132, 0.32);
     
-    --success: #10B981;
-    --success-bg: rgba(16, 185, 129, 0.15);
-    --success-border: rgba(16, 185, 129, 0.3);
+    --success: #00D084;
+    --success-bg: rgba(0, 208, 132, 0.14);
+    --success-border: rgba(0, 208, 132, 0.30);
     
     --warning: #F59E0B;
-    --warning-bg: rgba(245, 158, 11, 0.15);
-    --warning-border: rgba(245, 158, 11, 0.3);
+    --warning-bg: rgba(245, 158, 11, 0.14);
+    --warning-border: rgba(245, 158, 11, 0.30);
     
     --danger: #EF4444;
-    --danger-bg: rgba(239, 68, 68, 0.15);
-    --danger-border: rgba(239, 68, 68, 0.3);
+    --danger-bg: rgba(239, 68, 68, 0.14);
+    --danger-border: rgba(239, 68, 68, 0.30);
     
-    --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.03);
-    --card-shadow-hover: 0 6px 16px 0 rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(16, 185, 129, 0.2);
+    --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 208, 132, 0.05);
+    --card-shadow-hover: 0 6px 18px 0 rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(0, 208, 132, 0.28);
     
-    --status-connected: #10B981;
+    --status-connected: #00D084;
     --status-disconnected: #EF4444;
     
-    --scrollbar-track: #0B0F17;
-    --scrollbar-thumb: #1F2937;
-    --scrollbar-thumb-hover: #374151;
+    --scrollbar-track: #080E0B;
+    --scrollbar-thumb: #1E382B;
+    --scrollbar-thumb-hover: #294D3B;
     
-    --btn-primary: #10B981;
-    --btn-primary-hover: #059669;
-    --btn-primary-active: #047857;
+    --btn-primary: #00A86B;
+    --btn-primary-hover: #008F5B;
+    --btn-primary-active: #00764B;
     
-    --sidebar-bg: #0E1422;
-    --sidebar-border: #1F2937;
-    --sidebar-active-bg: rgba(16, 185, 129, 0.14);
-    --sidebar-active-text: #34D399;
+    --sidebar-bg: #0B140F;
+    --sidebar-border: #1E382B;
+    --sidebar-active-bg: rgba(0, 208, 132, 0.15);
+    --sidebar-active-text: #00D084;
     
-    --panel-bg: #111827;
-    --panel-border: #1F2937;
+    --panel-bg: #0F1A14;
+    --panel-border: #1E382B;
     
-    --log-bg: #090D14;
-    --log-border: #10B981;
-    --terminal-color: #E2E8F0;
-    --hash-color: #34D399;
+    --log-bg: #0A130E;
+    --log-border: #00A86B;
+    --terminal-color: #E2F7EC;
+    --hash-color: #00D084;
     
-    --badge-verified-bg: rgba(16, 185, 129, 0.15);
-    --badge-verified-color: #34D399;
+    --badge-verified-bg: rgba(0, 208, 132, 0.15);
+    --badge-verified-color: #00D084;
     --badge-pending-bg: rgba(245, 158, 11, 0.15);
     --badge-pending-color: #FBBF24;
     
-    --chart-grid: rgba(255, 255, 255, 0.05);
-    --chart-ticks: #9CA3AF;
+    --chart-grid: rgba(0, 208, 132, 0.06);
+    --chart-ticks: #6E8E7E;
     
-    --shap-positive: #34D399;
+    --shap-positive: #00D084;
     --shap-negative: #F87171;
-    --shap-highlight: #34D399;
+    --shap-highlight: #00D084;
 }
 
 /* ── Global Reset & Typography ── */
